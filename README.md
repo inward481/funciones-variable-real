@@ -9,8 +9,6 @@ ejercicios propuestos con sus respuestas.
 
 📖 **[Leer el libro](https://inward481.github.io/funciones-variable-real/)**
 
-> Reemplaza `inward481` y `funciones-variable-real` por los tuyos cuando publiques en GitHub Pages.
-
 ---
 
 ## De qué trata
@@ -141,14 +139,6 @@ Si prefieres servirlo en local:
 python3 -m http.server 8000
 # luego abre http://localhost:8000
 ```
-
-### Publicarlo en GitHub Pages
-
-En **Settings → Pages**, elige *Deploy from a branch*, rama `main` y carpeta
-`/ (root)`. Como `index.html` está en la raíz del repositorio, el libro queda
-disponible en `https://inward481.github.io/funciones-variable-real/` en un par de minutos.
-
----
 
 ## Estructura del repositorio
 
