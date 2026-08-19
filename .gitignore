@@ -1,0 +1,36 @@
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+*~
+~$*
+
+# Editores
+.vscode/
+.idea/
+*.swp
+
+# R
+.Rhistory
+.RData
+.Rproj.user/
+
+# Temporales, respaldos y registros
+*.tmp
+*.bak
+*.old
+*.log
+debug.log
+*copia*
+*- copia*
+
+# Comprimidos
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Otros
+node_modules/
+__pycache__/
+.env

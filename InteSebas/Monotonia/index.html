@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monotonía y extremos relativos</title>
+
+<style>
+/* Los colores se repiten en el objeto COLOR del script, porque los
+   atributos de un SVG generado no leen var(--...) en todos los
+   navegadores. Si cambias uno aquí, cámbialo también allá. */
+:root {
+  --color-curva:   #e8710a;
+  --color-crece:   #0b7a3b;
+  --color-decrece: #c0392b;
+  --color-constante: #1a56db;
+  --color-punto:   #8e44ad;
+}
+
+body {
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 13px; color: #222; margin: 0; padding: 4px;
+  background: transparent;
+}
+
+.barra { display: flex; justify-content: center; gap: 7px; flex-wrap: wrap; margin-bottom: 3px; }
+
+button {
+  padding: 4px 11px; font-size: 13px; cursor: pointer;
+  border: 1px solid #888; border-radius: 3px; background: #f2f2f2;
+}
+button:hover { background: #e4e4e4; }
+button.principal { background: var(--color-crece); color: #fff; border-color: var(--color-crece); }
+button.principal:hover { filter: brightness(1.12); }
+
+svg { width: 100%; height: auto; display: block; touch-action: none; cursor: crosshair; }
+
+.lectura { text-align: center; font-size: 12px; margin: 2px 0; color: #555; }
+.lectura b { color: var(--color-punto); }
+
+/* Rejilla de campos de respuesta */
+.formulario {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 8px;
+  margin-top: 4px;
+}
+.campo { display: flex; align-items: center; gap: 4px; }
+.campo label { font-weight: bold; font-size: 12px; white-space: nowrap; }
+.campo input {
+  flex: 1; min-width: 0; padding: 3px 4px; font-size: 12px;
+  border: 1px solid #bbb; border-radius: 3px;
+}
+.campo input.bien { border: 2px solid var(--color-crece); background: #eaf7ef; }
+.campo input.mal  { border: 2px solid var(--color-decrece); background: #fdeeec; }
+
+.et-crece     { color: var(--color-crece); }
+.et-decrece   { color: var(--color-decrece); }
+.et-constante { color: var(--color-constante); }
+.et-punto     { color: var(--color-punto); }
+
+.mensaje { text-align: center; min-height: 1.2em; font-size: 12px; margin-top: 4px; }
+.ok { color: var(--color-crece); font-weight: bold; }
+.no { color: var(--color-decrece); }
+.pista { text-align: center; font-size: 11px; color: #777; margin-top: 2px; line-height: 1.4; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }
+</style>
+</head>
+
+<body>
+<div id="envoltorio">
+
+
+<div class="barra">
+  <button type="button" id="btn-nuevo" class="principal">Nuevo ejercicio</button>
+  <button type="button" id="btn-corregir">Corregir</button>
+  <button type="button" id="btn-solucion">Ver solución</button>
+</div>
+
+<!-- El script dibuja aquí la gráfica -->
+<div id="grafica"></div>
+
+<p class="lectura">Punto sobre la curva: <b id="lectura">(0, 0)</b></p>
+
+<div class="formulario">
+  <span class="campo"><label class="et-crece">Crece</label>
+    <input type="text" id="resp-crece" autocomplete="off" placeholder="(-6,-2) U (2,4)"></span>
+  <span class="campo"><label class="et-decrece">Decrece</label>
+    <input type="text" id="resp-decrece" autocomplete="off" placeholder="(-2,2)"></span>
+  <span class="campo"><label class="et-constante">Constante</label>
+    <input type="text" id="resp-constante" autocomplete="off" placeholder="ninguno"></span>
+  <span class="campo"><label class="et-punto">Máximos</label>
+    <input type="text" id="resp-maximos" autocomplete="off" placeholder="(-2, 3)"></span>
+  <span class="campo"><label class="et-punto">Mínimos</label>
+    <input type="text" id="resp-minimos" autocomplete="off" placeholder="(2, -1); (4, 0)"></span>
+  <span class="campo"><label>&nbsp;</label></span>
+</div>
+
+<p class="mensaje" id="mensaje"></p>
+<p class="pista">
+  Intervalos abiertos separados con U. Puntos como (x, y) separados con punto y coma.
+  Si una categoría está vacía, déjala en blanco.
+</p>
+
+</div>
+<script>
+/* ==================================================================
+   1. CONSTRUCCIÓN DE LA CURVA
+
+   La curva se arma por tramos entre nodos de coordenadas enteras.
+   Cada tramo sube, baja o es constante, y dentro de él se usa la curva
+   suave s(t) = 3t² − 2t³, que va de 0 a 1 con tangente horizontal en
+   los dos extremos. Así la gráfica queda redondeada y, sobre todo, la
+   monotonía y los extremos se conocen de forma exacta: no hay que
+   estimarlos derivando ni muestreando.
+================================================================== */
+
+const COLOR = {
+  curva:     "#e8710a",
+  crece:     "#0b7a3b",
+  decrece:   "#c0392b",
+  constante: "#1a56db",
+  punto:     "#8e44ad",
+  eje:       "#666",
+  rejilla:   "#ececf2"
+};
+
+const X_MIN = -7.5, X_MAX = 7.5, Y_MIN = -4.5, Y_MAX = 4.5;
+const ANCHO_TRAMO = 2;
+
+let nodos = [];        // [{x, y}, ...]
+let tipos = [];        // "sube" | "baja" | "plana", uno por tramo
+let solucion = {};     // respuestas correctas
+
+function alAzar(desde, hasta) { return desde + Math.floor(Math.random() * (hasta - desde + 1)); }
+
+/* Sucesión de tramos. Los tramos que suben y bajan se alternan, para
+   que cada cambio de dirección sea un extremo. Una meseta solo se
+   inserta entre dos tramos de la misma dirección, de modo que nunca
+   aparece un extremo que sea un tramo entero en vez de un punto. */
+function crearTipos(cuantos) {
+  const lista = [];
+  let direccion = (Math.random() < 0.5) ? "sube" : "baja";
+
+  while (lista.length < cuantos) {
+    lista.push(direccion);
+    if (Math.random() < 0.28 && lista.length + 2 <= cuantos) {
+      lista.push("plana");
+      lista.push(direccion);
+    }
+    direccion = (direccion === "sube") ? "baja" : "sube";
+  }
+  return lista.slice(0, cuantos);
+}
+
+/* Alturas de los nodos. Se intenta varias veces hasta que la sucesión
+   completa cabe entre −4 y 4 con saltos de 2 o 3. */
+function crearAlturas(listaTipos) {
+  for (let intento = 0; intento < 300; intento++) {
+    const alturas = [alAzar(-1, 1)];
+    let sirve = true;
+
+    for (const tipo of listaTipos) {
+      const anterior = alturas[alturas.length - 1];
+      let siguiente;
+
+      if (tipo === "plana") siguiente = anterior;
+      else {
+        const salto = alAzar(2, 3);
+        siguiente = (tipo === "sube") ? anterior + salto : anterior - salto;
+      }
+
+      if (siguiente < -4 || siguiente > 4) { sirve = false; break; }
+      alturas.push(siguiente);
+    }
+
+    if (sirve) return alturas;
+  }
+  return null;
+}
+
+function generar() {
+  let listaTipos, alturas;
+  do {
+    listaTipos = crearTipos(alAzar(5, 7));
+    alturas = crearAlturas(listaTipos);
+  } while (alturas === null);
+
+  tipos = listaTipos;
+
+  const ancho = tipos.length * ANCHO_TRAMO;
+  const inicio = -Math.floor(ancho / 2);
+
+  nodos = alturas.map(function (y, i) {
+    return { x: inicio + i * ANCHO_TRAMO, y: y };
+  });
+
+  calcularSolucion();
+}
+
+/* Curva suave dentro de un tramo: tangente horizontal en los extremos */
+function suave(t) { return t * t * (3 - 2 * t); }
+
+function valorEn(x) {
+  const primero = nodos[0], ultimo = nodos[nodos.length - 1];
+  if (x <= primero.x) return primero.y;
+  if (x >= ultimo.x) return ultimo.y;
+
+  for (let i = 0; i < nodos.length - 1; i++) {
+    if (x >= nodos[i].x && x <= nodos[i + 1].x) {
+      const t = (x - nodos[i].x) / (nodos[i + 1].x - nodos[i].x);
+      return nodos[i].y + (nodos[i + 1].y - nodos[i].y) * suave(t);
+    }
+  }
+  return primero.y;
+}
+
+/* ==================================================================
+   2. RESPUESTAS CORRECTAS
+   Los tramos consecutivos del mismo tipo se juntan en un solo
+   intervalo. Los extremos son los nodos interiores donde la dirección
+   cambia: de subir a bajar es un máximo, al revés un mínimo.
+================================================================== */
+function calcularSolucion() {
+  const juntar = function (tipoBuscado) {
+    const intervalos = [];
+    let i = 0;
+    while (i < tipos.length) {
+      if (tipos[i] !== tipoBuscado) { i++; continue; }
+      let j = i;
+      while (j + 1 < tipos.length && tipos[j + 1] === tipoBuscado) j++;
+      intervalos.push({ a: nodos[i].x, b: nodos[j + 1].x });
+      i = j + 1;
+    }
+    return intervalos;
+  };
+
+  const maximos = [], minimos = [];
+  for (let i = 1; i < nodos.length - 1; i++) {
+    const antes = tipos[i - 1], despues = tipos[i];
+    if (antes === "sube" && despues === "baja") maximos.push({ x: nodos[i].x, y: nodos[i].y });
+    if (antes === "baja" && despues === "sube") minimos.push({ x: nodos[i].x, y: nodos[i].y });
+  }
+
+  solucion = {
+    crece: juntar("sube"),
+    decrece: juntar("baja"),
+    constante: juntar("plana"),
+    maximos: maximos,
+    minimos: minimos
+  };
+}
+
+/* ==================================================================
+   3. LECTURA Y COMPARACIÓN DE RESPUESTAS
+================================================================== */
+
+/* "(-6,-2) U (2,4)" se convierte en una lista de intervalos */
+function leerIntervalos(texto) {
+  const limpio = texto.replace(/−/g, "-").trim();
+  if (limpio === "" || /^ningun[oa]?$/i.test(limpio)) return [];
+
+  const partes = limpio.replace(/∪/g, "U").replace(/u/g, "U").split("U");
+  const lista = [];
+
+  for (const parte of partes) {
+    const trozo = parte.replace(/\s/g, "").match(/^\((-?\d+),(-?\d+)\)$/);
+    if (!trozo) return null;
+    const a = parseInt(trozo[1], 10), b = parseInt(trozo[2], 10);
+    if (a >= b) return null;
+    lista.push({ a: a, b: b });
+  }
+
+  lista.sort(function (p, q) { return p.a - q.a; });
+  return lista;
+}
+
+/* "(-2, 3); (4, 0)" se convierte en una lista de puntos */
+function leerPuntos(texto) {
+  const limpio = texto.replace(/−/g, "-").trim();
+  if (limpio === "" || /^ningun[oa]?$/i.test(limpio)) return [];
+
+  const partes = limpio.split(";");
+  const lista = [];
+
+  for (const parte of partes) {
+    const punto = parte.replace(/\s/g, "").match(/^\((-?\d+),(-?\d+)\)$/);
+    if (!punto) return null;
+    lista.push({ x: parseInt(punto[1], 10), y: parseInt(punto[2], 10) });
+  }
+
+  lista.sort(function (p, q) { return p.x - q.x; });
+  return lista;
+}
+
+function igualesIntervalos(lista1, lista2) {
+  if (lista1.length !== lista2.length) return false;
+  return lista1.every(function (p, i) { return p.a === lista2[i].a && p.b === lista2[i].b; });
+}
+function igualesPuntos(lista1, lista2) {
+  if (lista1.length !== lista2.length) return false;
+  return lista1.every(function (p, i) { return p.x === lista2[i].x && p.y === lista2[i].y; });
+}
+
+function textoIntervalos(lista) {
+  if (lista.length === 0) return "ninguno";
+  return lista.map(function (I) { return "(" + I.a + ", " + I.b + ")"; }).join(" U ");
+}
+function textoPuntos(lista) {
+  if (lista.length === 0) return "ninguno";
+  return lista.map(function (P) { return "(" + P.x + ", " + P.y + ")"; }).join("; ");
+}
+
+/* ==================================================================
+   4. DIBUJO
+================================================================== */
+const ANCHO = 560, ALTO = 300;
+const MARGEN = { izq: 20, der: 20, arr: 16, aba: 16 };
+const ANCHO_UTIL = ANCHO - MARGEN.izq - MARGEN.der;
+const ALTO_UTIL  = ALTO - MARGEN.arr - MARGEN.aba;
+
+function coordX(x) { return MARGEN.izq + ((x - X_MIN) / (X_MAX - X_MIN)) * ANCHO_UTIL; }
+function coordY(y) { return MARGEN.arr + ALTO_UTIL - ((y - Y_MIN) / (Y_MAX - Y_MIN)) * ALTO_UTIL; }
+
+let xPunto = 0;
+let mostrarSolucion = false;
+
+function dibujar() {
+  let svg = '<svg viewBox="0 0 ' + ANCHO + ' ' + ALTO + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Rejilla
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    svg += '<line x1="' + coordX(x) + '" y1="' + MARGEN.arr + '" x2="' + coordX(x) +
+           '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    svg += '<line x1="' + MARGEN.izq + '" y1="' + coordY(y) + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+           '" y2="' + coordY(y) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+
+  // Ejes y numeración
+  const yCero = coordY(0), xCero = coordX(0);
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + yCero + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+         '" y2="' + yCero + '" stroke="' + COLOR.eje + '"/>';
+  svg += '<line x1="' + xCero + '" y1="' + MARGEN.arr + '" x2="' + xCero +
+         '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.eje + '"/>';
+
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    if (x === 0) continue;
+    svg += '<text x="' + coordX(x) + '" y="' + (yCero + 11) + '" text-anchor="middle"' +
+           ' font-size="9" fill="#999">' + x + '</text>';
+  }
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    if (y === 0) continue;
+    svg += '<text x="' + (xCero - 4) + '" y="' + (coordY(y) + 3) + '" text-anchor="end"' +
+           ' font-size="9" fill="#999">' + y + '</text>';
+  }
+
+  // La curva, tramo por tramo. Al ver la solución cada tramo toma el
+  // color de su tipo; si no, todos van del mismo color.
+  for (let i = 0; i < nodos.length - 1; i++) {
+    const color = !mostrarSolucion ? COLOR.curva :
+                  (tipos[i] === "sube" ? COLOR.crece :
+                   tipos[i] === "baja" ? COLOR.decrece : COLOR.constante);
+
+    let puntos = "";
+    for (let k = 0; k <= 40; k++) {
+      const x = nodos[i].x + (nodos[i + 1].x - nodos[i].x) * k / 40;
+      puntos += coordX(x) + "," + coordY(valorEn(x)) + " ";
+    }
+    svg += '<polyline points="' + puntos + '" fill="none" stroke="' + color +
+           '" stroke-width="2.8" stroke-linecap="round"/>';
+  }
+
+  // Extremos relativos, solo al ver la solución
+  if (mostrarSolucion) {
+    solucion.maximos.forEach(function (P) {
+      svg += '<circle cx="' + coordX(P.x) + '" cy="' + coordY(P.y) + '" r="5" fill="' +
+             COLOR.crece + '" stroke="#fff" stroke-width="1.5"/>';
+      svg += '<text x="' + coordX(P.x) + '" y="' + (coordY(P.y) - 10) + '" text-anchor="middle"' +
+             ' font-size="10" font-weight="bold" fill="' + COLOR.crece + '">máx</text>';
+    });
+    solucion.minimos.forEach(function (P) {
+      svg += '<circle cx="' + coordX(P.x) + '" cy="' + coordY(P.y) + '" r="5" fill="' +
+             COLOR.decrece + '" stroke="#fff" stroke-width="1.5"/>';
+      svg += '<text x="' + coordX(P.x) + '" y="' + (coordY(P.y) + 18) + '" text-anchor="middle"' +
+             ' font-size="10" font-weight="bold" fill="' + COLOR.decrece + '">mín</text>';
+    });
+  }
+
+  // Punto móvil de exploración, con sus guías
+  const yPunto = valorEn(xPunto);
+  svg += '<line x1="' + coordX(xPunto) + '" y1="' + coordY(yPunto) + '" x2="' + coordX(xPunto) +
+         '" y2="' + yCero + '" stroke="' + COLOR.punto + '" stroke-dasharray="3 3"/>';
+  svg += '<line x1="' + coordX(xPunto) + '" y1="' + coordY(yPunto) + '" x2="' + xCero +
+         '" y2="' + coordY(yPunto) + '" stroke="' + COLOR.punto + '" stroke-dasharray="3 3"/>';
+  svg += '<circle cx="' + coordX(xPunto) + '" cy="' + coordY(yPunto) + '" r="5" fill="' +
+         COLOR.punto + '" stroke="#fff" stroke-width="1.5"/>';
+
+  svg += '</svg>';
+  document.getElementById("grafica").innerHTML = svg;
+
+  document.getElementById("lectura").textContent =
+    "(" + (Math.round(xPunto * 100) / 100) + ", " + (Math.round(yPunto * 100) / 100) + ")";
+}
+
+/* ==================================================================
+   5. INTERACCIÓN
+================================================================== */
+function xDesdePuntero(evento, svg) {
+  const caja = svg.getBoundingClientRect();
+  const enSVG = (evento.clientX - caja.left) * (ANCHO / caja.width);
+  const x = X_MIN + ((enSVG - MARGEN.izq) / ANCHO_UTIL) * (X_MAX - X_MIN);
+  return Math.min(nodos[nodos.length - 1].x, Math.max(nodos[0].x, x));
+}
+
+const zona = document.getElementById("grafica");
+let arrastrando = false;
+
+zona.addEventListener("pointerdown", function (evento) {
+  arrastrando = true;
+  xPunto = xDesdePuntero(evento, zona.querySelector("svg"));
+  dibujar();
+});
+zona.addEventListener("pointermove", function (evento) {
+  if (!arrastrando) return;
+  xPunto = xDesdePuntero(evento, zona.querySelector("svg"));
+  dibujar();
+});
+window.addEventListener("pointerup", function () { arrastrando = false; });
+window.addEventListener("pointercancel", function () { arrastrando = false; });
+
+/* ==================================================================
+   6. BOTONES
+================================================================== */
+const CAMPOS = ["resp-crece", "resp-decrece", "resp-constante", "resp-maximos", "resp-minimos"];
+
+function nuevo() {
+  generar();
+  mostrarSolucion = false;
+  xPunto = nodos[0].x;
+  CAMPOS.forEach(function (id) {
+    const campo = document.getElementById(id);
+    campo.value = "";
+    campo.className = "";
+  });
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "";
+  mensaje.className = "mensaje";
+  dibujar();
+}
+
+function corregir() {
+  const leidos = {
+    crece:     leerIntervalos(document.getElementById("resp-crece").value),
+    decrece:   leerIntervalos(document.getElementById("resp-decrece").value),
+    constante: leerIntervalos(document.getElementById("resp-constante").value),
+    maximos:   leerPuntos(document.getElementById("resp-maximos").value),
+    minimos:   leerPuntos(document.getElementById("resp-minimos").value)
+  };
+
+  const mensaje = document.getElementById("mensaje");
+
+  // Primero, si algo está mal escrito se avisa sin corregir nada más
+  const malEscritos = CAMPOS.filter(function (id, i) {
+    return leidos[Object.keys(leidos)[i]] === null;
+  });
+  if (malEscritos.length > 0) {
+    CAMPOS.forEach(function (id, i) {
+      document.getElementById(id).className =
+        (leidos[Object.keys(leidos)[i]] === null) ? "mal" : "";
+    });
+    mensaje.textContent = "Revisa la escritura: intervalos como (-2, 3) separados con U, puntos con punto y coma.";
+    mensaje.className = "mensaje no";
+    return;
+  }
+
+  const aciertos = {
+    crece:     igualesIntervalos(leidos.crece, solucion.crece),
+    decrece:   igualesIntervalos(leidos.decrece, solucion.decrece),
+    constante: igualesIntervalos(leidos.constante, solucion.constante),
+    maximos:   igualesPuntos(leidos.maximos, solucion.maximos),
+    minimos:   igualesPuntos(leidos.minimos, solucion.minimos)
+  };
+
+  CAMPOS.forEach(function (id, i) {
+    document.getElementById(id).className = aciertos[Object.keys(aciertos)[i]] ? "bien" : "mal";
+  });
+
+  const bien = Object.keys(aciertos).filter(function (k) { return aciertos[k]; }).length;
+
+  if (bien === 5) {
+    mensaje.textContent = "¡Todo correcto! Monotonía y extremos bien identificados.";
+    mensaje.className = "mensaje ok";
+  } else {
+    mensaje.textContent = "Aciertas " + bien + " de 5. Recuerda: los extremos están donde la curva cambia de dirección.";
+    mensaje.className = "mensaje no";
+  }
+}
+
+function verSolucion() {
+  mostrarSolucion = true;
+  dibujar();
+  document.getElementById("resp-crece").value = textoIntervalos(solucion.crece);
+  document.getElementById("resp-decrece").value = textoIntervalos(solucion.decrece);
+  document.getElementById("resp-constante").value = textoIntervalos(solucion.constante);
+  document.getElementById("resp-maximos").value = textoPuntos(solucion.maximos);
+  document.getElementById("resp-minimos").value = textoPuntos(solucion.minimos);
+  CAMPOS.forEach(function (id) { document.getElementById(id).className = ""; });
+
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "Verde donde crece, rojo donde decrece, azul donde es constante.";
+  mensaje.className = "mensaje";
+}
+
+document.getElementById("btn-nuevo").addEventListener("click", nuevo);
+document.getElementById("btn-corregir").addEventListener("click", corregir);
+document.getElementById("btn-solucion").addEventListener("click", verSolucion);
+
+CAMPOS.forEach(function (id) {
+  document.getElementById(id).addEventListener("keydown", function (evento) {
+    if (evento.key === "Enter") corregir();
+  });
+});
+
+nuevo();
+</script>
+
+
+<script>
+/* Ajusta la escala del contenido al alto de la ventana del iframe */
+(function () {
+  const envoltorio = document.getElementById("envoltorio");
+
+  function ajustar() {
+    const altoReal = envoltorio.offsetHeight;
+    if (!altoReal) return;
+    const factor = Math.min(1, (window.innerHeight - 4) / altoReal);
+    envoltorio.style.transform = "scale(" + factor + ")";
+  }
+
+  window.addEventListener("resize", ajustar);
+  // El contenido cambia de alto al generar ejercicios o gráficas nuevas
+  if (window.ResizeObserver) new ResizeObserver(ajustar).observe(envoltorio);
+  ajustar();
+})();
+</script>
+
+</body>
+</html>

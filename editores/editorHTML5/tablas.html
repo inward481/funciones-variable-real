@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+	<title>Inspire.js: A brief introduction</title>
+
+	<link href="inspire.css" rel="stylesheet" />
+	<link href="theme.css" rel="stylesheet" />
+	<link href="talk.css" rel="stylesheet" />
+</head>
+<body class="language-markup" data-prism-plugins="normalize-whitespace">
+<section>
+
+	<article class="isolated demo slide" id="isolated-livedemo">
+		<textarea class="language-html">
+		<table>
+		<tr>
+		<th>Mamíferos</th>
+		<th>Aves</th><th>Peces</th><th>Reptiles</th>
+		</tr>
+		<tr>
+		<td>Gato</td><td>Gallo</td><td>Salmón</td>
+		<td>Caimán</td>
+		</tr>
+		<tr>
+		<td>Perro</td><td>Colibrí</td><td>Sierra</td>
+		<td>Salamandra</td>
+		</tr>
+		<tr>
+		<td>León</td><td>Paloma</td><td>Atún</td><td>Boa</td>
+		</tr>
+		</table>
+		</textarea>
+		<textarea class="language-css">
+			table, th, td {
+			border: 2px solid black;
+			 border-collapse: collapse;
+			text-align: left;
+			}
+			table {
+			width:60%;
+			}
+			th, td {
+			padding: 2px 10px 2px 10px;
+			}
+			th {
+			background: rgb(79,112,197);
+			color: white;
+			}
+			tr:nth-child(even) {background-color: #d2e2d2;}
+		</textarea>
+	</article>
+
+
+</section>
+
+
+
+<script src="inspire.js"></script>
+
+</body>
+</html>

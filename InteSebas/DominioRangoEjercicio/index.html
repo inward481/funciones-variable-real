@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dominio y rango a partir de la gráfica</title>
+
+<style>
+/* Los colores están repetidos en el objeto COLOR del script, porque los
+   atributos de un SVG generado no leen var(--...) en todos los
+   navegadores. Si cambias uno aquí, cámbialo también allá. */
+:root {
+  --color-curva:   #222;
+  --color-dominio: #0b7a3b;
+  --color-rango:   #8e44ad;
+  --color-error:   #c0392b;
+}
+
+body {
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 13px; color: #222; margin: 0; padding: 4px;
+  background: transparent;
+}
+
+.barra { display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+
+button {
+  padding: 4px 11px; font-size: 13px; cursor: pointer;
+  border: 1px solid #888; border-radius: 3px; background: #f2f2f2;
+}
+button:hover { background: #e4e4e4; }
+button.principal { background: var(--color-dominio); color: #fff; border-color: var(--color-dominio); }
+button.principal:hover { filter: brightness(1.1); }
+
+svg { width: 100%; height: auto; display: block; }
+
+/* Recuadro de teoría, oculto salvo que se pida */
+.teoria {
+  display: none;
+  border-left: 3px solid #888; padding: 4px 0 4px 10px;
+  margin: 6px 0; font-size: 12px; line-height: 1.45;
+}
+.teoria.visible { display: block; }
+
+.respuestas { display: flex; justify-content: center; gap: 14px; margin-top: 5px; flex-wrap: wrap; }
+.campo { display: flex; align-items: center; gap: 5px; }
+.campo span { font-weight: bold; }
+.campo .et-dom { color: var(--color-dominio); }
+.campo .et-ran { color: var(--color-rango); }
+.campo input {
+  width: 165px; padding: 3px 5px; font-size: 13px;
+  border: 1px solid #bbb; border-radius: 3px; text-align: center;
+}
+.campo input.bien { border: 2px solid var(--color-dominio); background: #eaf7ef; }
+.campo input.mal  { border: 2px solid var(--color-error); background: #fdeeec; }
+
+.mensaje { text-align: center; min-height: 1.2em; font-size: 12px; margin-top: 4px; }
+.ok  { color: var(--color-dominio); font-weight: bold; }
+.no  { color: var(--color-error); }
+.pista { text-align: center; font-size: 11px; color: #777; margin-top: 2px; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }
+</style>
+</head>
+
+<body>
+<div id="envoltorio">
+
+
+<div class="barra">
+  <button type="button" id="btn-nuevo" class="principal">Nuevo ejercicio</button>
+  <button type="button" id="btn-comprobar">Comprobar</button>
+  <button type="button" id="btn-solucion">Ver solución</button>
+  <button type="button" id="btn-teoria">Ver teoría</button>
+</div>
+
+<div class="teoria" id="teoria">
+  El <b>dominio</b> son los valores de <i>x</i> para los que la gráfica existe: se lee
+  proyectándola sobre el eje horizontal. El <b>rango</b> son los valores de <i>y</i> que
+  la gráfica alcanza: se lee proyectándola sobre el eje vertical.<br>
+  Un punto <b>relleno</b> pertenece al conjunto y se escribe con corchete, como [2, 5].
+  Un punto <b>hueco</b> no pertenece y se escribe con paréntesis, como (2, 5).
+  Si la gráfica tiene trozos separados, se unen con ∪.
+</div>
+
+<!-- El script dibuja aquí la gráfica -->
+<div id="grafica"></div>
+
+<div class="respuestas">
+  <span class="campo"><span class="et-dom">Dom f =</span>
+    <input type="text" id="resp-dom" autocomplete="off" placeholder="[-2, 2] U (3, 5]"></span>
+  <span class="campo"><span class="et-ran">Ran f =</span>
+    <input type="text" id="resp-ran" autocomplete="off" placeholder="[-1, 3]"></span>
+</div>
+
+<p class="mensaje" id="mensaje"></p>
+<p class="pista">Escribe la unión con U. Un punto suelto se escribe {3}.</p>
+
+</div>
+<script>
+/* ==================================================================
+   1. INTERVALOS: representación y operaciones
+   Un intervalo es { min, max, minCerrado, maxCerrado }.
+================================================================== */
+
+/* Ordena y fusiona una lista de intervalos en su forma más simple.
+   Dos intervalos se fusionan si se solapan, o si se tocan y el punto
+   de encuentro pertenece al menos a uno de los dos. */
+function fusionar(lista) {
+  const trozos = lista.slice().sort(function (p, q) {
+    if (p.min !== q.min) return p.min - q.min;
+    return (q.minCerrado ? 1 : 0) - (p.minCerrado ? 1 : 0);
+  });
+
+  const resultado = [];
+  trozos.forEach(function (trozo) {
+    const ultimo = resultado[resultado.length - 1];
+
+    if (!ultimo) { resultado.push(Object.assign({}, trozo)); return; }
+
+    const seSolapan = trozo.min < ultimo.max;
+    const seTocan = (trozo.min === ultimo.max) && (ultimo.maxCerrado || trozo.minCerrado);
+
+    if (seSolapan || seTocan) {
+      if (trozo.max > ultimo.max) {
+        ultimo.max = trozo.max;
+        ultimo.maxCerrado = trozo.maxCerrado;
+      } else if (trozo.max === ultimo.max) {
+        ultimo.maxCerrado = ultimo.maxCerrado || trozo.maxCerrado;
+      }
+    } else {
+      resultado.push(Object.assign({}, trozo));
+    }
+  });
+
+  return resultado;
+}
+
+/* Escritura de un intervalo y de una unión de intervalos */
+function textoIntervalo(I) {
+  if (I.min === I.max) return "{" + redondear(I.min) + "}";
+  return (I.minCerrado ? "[" : "(") + redondear(I.min) + ", " +
+         redondear(I.max) + (I.maxCerrado ? "]" : ")");
+}
+function textoUnion(lista) {
+  return lista.map(textoIntervalo).join(" ∪ ");
+}
+function redondear(x) { return String(Math.round(x * 100) / 100); }
+
+/* Lee lo que escribe el estudiante: "[-2,2] U (3,5]" o "{3}" */
+function leerRespuesta(texto) {
+  const partes = texto.replace(/∪/g, "U").replace(/u/g, "U").split("U");
+  const lista = [];
+
+  for (const parte of partes) {
+    const limpio = parte.trim().replace(/−/g, "-").replace(/\s/g, "");
+    if (limpio === "") return null;
+
+    const punto = limpio.match(/^\{(-?\d+(?:\.\d+)?)\}$/);
+    if (punto) {
+      const v = parseFloat(punto[1]);
+      lista.push({ min: v, max: v, minCerrado: true, maxCerrado: true });
+      continue;
+    }
+
+    const trozo = limpio.match(/^([\[\(])(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)([\]\)])$/);
+    if (!trozo) return null;
+
+    const a = parseFloat(trozo[2]), b = parseFloat(trozo[3]);
+    if (a > b) return null;
+    lista.push({
+      min: a, max: b,
+      minCerrado: trozo[1] === "[",
+      maxCerrado: trozo[4] === "]"
+    });
+  }
+
+  return fusionar(lista);
+}
+
+/* Compara la respuesta con la solución */
+function sonIguales(lista1, lista2) {
+  if (lista1.length !== lista2.length) return false;
+  for (let i = 0; i < lista1.length; i++) {
+    const p = lista1[i], q = lista2[i];
+    if (Math.abs(p.min - q.min) > 1e-9) return false;
+    if (Math.abs(p.max - q.max) > 1e-9) return false;
+    if (p.minCerrado !== q.minCerrado) return false;
+    if (p.maxCerrado !== q.maxCerrado) return false;
+  }
+  return true;
+}
+
+/* ==================================================================
+   2. GENERACIÓN DEL EJERCICIO
+   La gráfica se arma con dos o tres trozos separados. Cada trozo vive
+   en un intervalo de x con extremos enteros, y sus extremos pueden ser
+   abiertos o cerrados.
+================================================================== */
+
+const COLOR = {
+  curva:   "#222",
+  dominio: "#0b7a3b",
+  rango:   "#8e44ad",
+  eje:     "#666",
+  rejilla: "#e9e9ef"
+};
+
+const X_MIN = -7.5, X_MAX = 7.5, Y_MIN = -4, Y_MAX = 4;
+
+let trozos = [];        // los trozos de la gráfica
+let dominio = [];       // solución: dominio
+let rango = [];         // solución: rango
+
+function alAzar(desde, hasta) {          // entero entre desde y hasta
+  return desde + Math.floor(Math.random() * (hasta - desde + 1));
+}
+function unoDe(lista) { return lista[alAzar(0, lista.length - 1)]; }
+
+/* Construye la regla de un trozo sobre [a,b]. Se elige entre cuatro
+   formas: constante, recta, parábola y onda. */
+function crearRegla(a, b) {
+  const tipo = unoDe(["constante", "recta", "parabola", "onda"]);
+  const medio = (a + b) / 2;
+  const radio = (b - a) / 2;
+
+  if (tipo === "constante") {
+    const c = alAzar(-3, 3);
+    return { f: function () { return c; } };
+  }
+
+  if (tipo === "recta") {
+    let y1 = alAzar(-3, 3), y2 = alAzar(-3, 3);
+    if (y1 === y2) y2 = y1 + (y1 < 3 ? 1 : -1);
+    return { f: function (x) { return y1 + (y2 - y1) * (x - a) / (b - a); } };
+  }
+
+  if (tipo === "parabola") {
+    const vertice = alAzar(-3, 3);
+    let borde = alAzar(-3, 3);
+    if (borde === vertice) borde = vertice + (vertice < 3 ? 2 : -2);
+    return {
+      f: function (x) {
+        const t = (x - medio) / radio;
+        return vertice + (borde - vertice) * t * t;
+      }
+    };
+  }
+
+  // onda: al menos un periodo completo dentro del trozo
+  const centro = alAzar(-2, 2);
+  const amplitud = unoDe([1, 1.5, 2]);
+  const arriba = Math.min(3.5, centro + amplitud);
+  const abajo = Math.max(-3.5, centro - amplitud);
+  const semi = (arriba - abajo) / 2, eje = (arriba + abajo) / 2;
+  const frecuencia = 2 * Math.PI / ((b - a) / unoDe([1, 1.5]));
+  return { f: function (x) { return eje + semi * Math.sin(frecuencia * (x - a)); } };
+}
+
+/* Rango de un trozo. Se muestrea la regla y se decide si cada extremo
+   se alcanza en el interior (entonces el rango es cerrado ahí) o solo
+   en un borde (entonces hereda si ese borde es abierto o cerrado). */
+function rangoDelTrozo(trozo) {
+  const PASOS = 4000;
+  let minInterior = Infinity, maxInterior = -Infinity;
+
+  for (let i = 1; i < PASOS; i++) {
+    const x = trozo.a + (trozo.b - trozo.a) * i / PASOS;
+    const y = trozo.f(x);
+    if (y < minInterior) minInterior = y;
+    if (y > maxInterior) maxInterior = y;
+  }
+
+  const yA = trozo.f(trozo.a), yB = trozo.f(trozo.b);
+  const minTotal = Math.min(minInterior, yA, yB);
+  const maxTotal = Math.max(maxInterior, yA, yB);
+  const tol = 1e-9;
+
+  // ¿el mínimo se alcanza dentro? entonces está incluido
+  let minCerrado;
+  if (minInterior <= minTotal + tol) minCerrado = true;
+  else {
+    minCerrado = (Math.abs(yA - minTotal) < tol && trozo.aCerrado) ||
+                 (Math.abs(yB - minTotal) < tol && trozo.bCerrado);
+  }
+
+  let maxCerrado;
+  if (maxInterior >= maxTotal - tol) maxCerrado = true;
+  else {
+    maxCerrado = (Math.abs(yA - maxTotal) < tol && trozo.aCerrado) ||
+                 (Math.abs(yB - maxTotal) < tol && trozo.bCerrado);
+  }
+
+  return { min: minTotal, max: maxTotal, minCerrado: minCerrado, maxCerrado: maxCerrado };
+}
+
+function generar() {
+  const cuantos = alAzar(2, 3);
+  const anchos = [], huecos = [];
+
+  for (let i = 0; i < cuantos; i++) anchos.push(cuantos === 3 ? alAzar(2, 3) : alAzar(2, 4));
+  for (let i = 0; i < cuantos - 1; i++) huecos.push(alAzar(1, 2));
+
+  const total = anchos.concat(huecos).reduce(function (s, v) { return s + v; }, 0);
+  let x = -7 + alAzar(0, 14 - total);
+
+  trozos = [];
+  for (let i = 0; i < cuantos; i++) {
+    const a = x, b = x + anchos[i];
+    const regla = crearRegla(a, b);
+    trozos.push({
+      a: a, b: b, f: regla.f,
+      aCerrado: Math.random() < 0.6,
+      bCerrado: Math.random() < 0.6
+    });
+    x = b + (huecos[i] || 0);
+  }
+
+  dominio = fusionar(trozos.map(function (t) {
+    return { min: t.a, max: t.b, minCerrado: t.aCerrado, maxCerrado: t.bCerrado };
+  }));
+  rango = fusionar(trozos.map(rangoDelTrozo));
+}
+
+/* ==================================================================
+   3. DIBUJO
+================================================================== */
+const ANCHO = 560, ALTO = 300;
+const MARGEN = { izq: 20, der: 20, arr: 18, aba: 17 };
+const ANCHO_UTIL = ANCHO - MARGEN.izq - MARGEN.der;
+const ALTO_UTIL  = ALTO - MARGEN.arr - MARGEN.aba;
+
+function coordX(x) { return MARGEN.izq + ((x - X_MIN) / (X_MAX - X_MIN)) * ANCHO_UTIL; }
+function coordY(y) { return MARGEN.arr + ALTO_UTIL - ((y - Y_MIN) / (Y_MAX - Y_MIN)) * ALTO_UTIL; }
+
+function marca(x, y, cerrado, color) {
+  return '<circle cx="' + x + '" cy="' + y + '" r="4" stroke="' + color +
+         '" stroke-width="2" fill="' + (cerrado ? color : "#fff") + '"/>';
+}
+
+let mostrarSolucion = false;
+
+function dibujar() {
+  let svg = '<svg viewBox="0 0 ' + ANCHO + ' ' + ALTO + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Rejilla
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    svg += '<line x1="' + coordX(x) + '" y1="' + MARGEN.arr + '" x2="' + coordX(x) +
+           '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    svg += '<line x1="' + MARGEN.izq + '" y1="' + coordY(y) + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+           '" y2="' + coordY(y) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+
+  // Ejes y numeración
+  const yCero = coordY(0), xCero = coordX(0);
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + yCero + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+         '" y2="' + yCero + '" stroke="' + COLOR.eje + '"/>';
+  svg += '<line x1="' + xCero + '" y1="' + MARGEN.arr + '" x2="' + xCero +
+         '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.eje + '"/>';
+
+  for (let x = Math.ceil(X_MIN); x <= X_MAX; x++) {
+    if (x === 0) continue;
+    svg += '<text x="' + coordX(x) + '" y="' + (yCero + 11) + '" text-anchor="middle"' +
+           ' font-size="9" fill="#999">' + x + '</text>';
+  }
+  for (let y = Math.ceil(Y_MIN); y <= Y_MAX; y++) {
+    if (y === 0) continue;
+    svg += '<text x="' + (xCero - 4) + '" y="' + (coordY(y) + 3) + '" text-anchor="end"' +
+           ' font-size="9" fill="#999">' + y + '</text>';
+  }
+
+  // Solución dibujada sobre los ejes
+  if (mostrarSolucion) {
+    dominio.forEach(function (I) {
+      svg += '<line x1="' + coordX(I.min) + '" y1="' + yCero + '" x2="' + coordX(I.max) +
+             '" y2="' + yCero + '" stroke="' + COLOR.dominio + '" stroke-width="5" opacity="0.85"/>';
+      svg += marca(coordX(I.min), yCero, I.minCerrado, COLOR.dominio);
+      svg += marca(coordX(I.max), yCero, I.maxCerrado, COLOR.dominio);
+    });
+    rango.forEach(function (I) {
+      svg += '<line x1="' + xCero + '" y1="' + coordY(I.min) + '" x2="' + xCero +
+             '" y2="' + coordY(I.max) + '" stroke="' + COLOR.rango + '" stroke-width="5" opacity="0.85"/>';
+      svg += marca(xCero, coordY(I.min), I.minCerrado, COLOR.rango);
+      svg += marca(xCero, coordY(I.max), I.maxCerrado, COLOR.rango);
+    });
+  }
+
+  // Los trozos de la gráfica
+  trozos.forEach(function (t) {
+    const PASOS = 200;
+    let puntos = "";
+    for (let i = 0; i <= PASOS; i++) {
+      const x = t.a + (t.b - t.a) * i / PASOS;
+      puntos += coordX(x) + "," + coordY(t.f(x)) + " ";
+    }
+    svg += '<polyline points="' + puntos + '" fill="none" stroke="' + COLOR.curva +
+           '" stroke-width="2.5" stroke-linejoin="round"/>';
+    svg += marca(coordX(t.a), coordY(t.f(t.a)), t.aCerrado, COLOR.curva);
+    svg += marca(coordX(t.b), coordY(t.f(t.b)), t.bCerrado, COLOR.curva);
+  });
+
+  svg += '</svg>';
+  document.getElementById("grafica").innerHTML = svg;
+}
+
+/* ==================================================================
+   4. BOTONES
+================================================================== */
+function limpiarCampos() {
+  ["resp-dom", "resp-ran"].forEach(function (id) {
+    const campo = document.getElementById(id);
+    campo.value = "";
+    campo.className = "";
+  });
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "";
+  mensaje.className = "mensaje";
+}
+
+function nuevo() {
+  generar();
+  mostrarSolucion = false;
+  limpiarCampos();
+  dibujar();
+}
+
+function comprobar() {
+  const campoDom = document.getElementById("resp-dom");
+  const campoRan = document.getElementById("resp-ran");
+  const mensaje = document.getElementById("mensaje");
+
+  const leidoDom = leerRespuesta(campoDom.value);
+  const leidoRan = leerRespuesta(campoRan.value);
+
+  if (leidoDom === null || leidoRan === null) {
+    campoDom.className = leidoDom === null ? "mal" : "";
+    campoRan.className = leidoRan === null ? "mal" : "";
+    mensaje.textContent = "Revisa cómo lo escribiste. Ejemplo válido: [-2, 2] U (3, 5]";
+    mensaje.className = "mensaje no";
+    return;
+  }
+
+  const domBien = sonIguales(leidoDom, dominio);
+  const ranBien = sonIguales(leidoRan, rango);
+
+  campoDom.className = domBien ? "bien" : "mal";
+  campoRan.className = ranBien ? "bien" : "mal";
+
+  if (domBien && ranBien) {
+    mensaje.textContent = "¡Correcto! Dominio y rango bien leídos.";
+    mensaje.className = "mensaje ok";
+  } else if (domBien) {
+    mensaje.textContent = "El dominio está bien. Revisa el rango: mira hasta dónde sube y baja cada trozo.";
+    mensaje.className = "mensaje no";
+  } else if (ranBien) {
+    mensaje.textContent = "El rango está bien. Revisa el dominio: fíjate en los puntos huecos.";
+    mensaje.className = "mensaje no";
+  } else {
+    mensaje.textContent = "Todavía no. Proyecta cada trozo sobre los dos ejes.";
+    mensaje.className = "mensaje no";
+  }
+}
+
+function verSolucion() {
+  mostrarSolucion = true;
+  dibujar();
+  document.getElementById("resp-dom").value = textoUnion(dominio);
+  document.getElementById("resp-ran").value = textoUnion(rango);
+  document.getElementById("resp-dom").className = "";
+  document.getElementById("resp-ran").className = "";
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "En verde el dominio sobre el eje x, en morado el rango sobre el eje y.";
+  mensaje.className = "mensaje";
+}
+
+document.getElementById("btn-nuevo").addEventListener("click", nuevo);
+document.getElementById("btn-comprobar").addEventListener("click", comprobar);
+document.getElementById("btn-solucion").addEventListener("click", verSolucion);
+document.getElementById("btn-teoria").addEventListener("click", function () {
+  document.getElementById("teoria").classList.toggle("visible");
+});
+
+["resp-dom", "resp-ran"].forEach(function (id) {
+  document.getElementById(id).addEventListener("keydown", function (evento) {
+    if (evento.key === "Enter") comprobar();
+  });
+});
+
+nuevo();
+</script>
+
+
+<script>
+/* Ajusta la escala del contenido al alto de la ventana del iframe */
+(function () {
+  const envoltorio = document.getElementById("envoltorio");
+
+  function ajustar() {
+    const altoReal = envoltorio.offsetHeight;
+    if (!altoReal) return;
+    const factor = Math.min(1, (window.innerHeight - 4) / altoReal);
+    envoltorio.style.transform = "scale(" + factor + ")";
+  }
+
+  window.addEventListener("resize", ajustar);
+  // El contenido cambia de alto al generar ejercicios o gráficas nuevas
+  if (window.ResizeObserver) new ResizeObserver(ajustar).observe(envoltorio);
+  ajustar();
+})();
+</script>
+
+</body>
+</html>

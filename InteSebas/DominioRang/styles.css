@@ -1,0 +1,86 @@
+/* Tamaño compacto a propósito: este interactivo se muestra dentro de una
+   página del libro y todo debe caber sin barra de desplazamiento. */
+
+body {
+  font-family: 'Lato', sans-serif;
+  font-size: 15px;
+  margin: 0;
+  padding: 6px;
+  color: #222;
+  background: transparent;
+}
+
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.enunciado {
+  margin: 0;
+  font-size: 16px;
+  text-align: center;
+}
+
+/* El SVG del diagrama se adapta al ancho disponible */
+#diagrama svg {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+}
+
+/* Colores del diagrama, definidos aquí para no repetirlos en el script */
+.ovalo      { fill: none; stroke: #555; stroke-width: 1.5; }
+.etiqueta   { font-size: 17px; font-weight: bold; fill: #000099; }
+.elemento   { font-size: 15px; fill: #222; }
+.flecha     { stroke: #c0392b; stroke-width: 1.6; }
+.sin-imagen { fill: #999; }
+
+.controles {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+label { font-size: 14px; }
+
+input {
+  width: 240px;
+  padding: 4px 6px;
+  font-size: 14px;
+  border: 1px solid #aaa;
+  border-radius: 3px;
+}
+
+.botones { display: flex; gap: 8px; margin-top: 6px; }
+
+button {
+  padding: 5px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #888;
+  border-radius: 3px;
+  background: #f2f2f2;
+}
+
+button:hover { background: #e2e2e2; }
+
+.respuesta {
+  margin: 2px 0 0 0;
+  min-height: 1.2em;
+  font-size: 14px;
+  text-align: center;
+}
+
+.correcto   { color: #0b7a3b; font-weight: bold; }
+.incorrecto { color: #c0392b; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }

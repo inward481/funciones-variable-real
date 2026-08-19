@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Vuelta: altitud según los km recorridos</title>
+
+<style>
+  /* Tamaño compacto: este interactivo se muestra dentro de una página del
+     libro, así que todo tiene que caber sin barra de desplazamiento. */
+  body {
+    font-family: 'Lato', Arial, sans-serif;
+    font-size: 13px;
+    color: #222;
+    margin: 0;
+    padding: 2px;
+    background: transparent;
+  }
+
+  h1 {
+    font-size: 14px;
+    text-align: center;
+    margin: 0;
+    color: #000099;
+  }
+
+  .subtitulo { text-align: center; font-size: 11px; margin: 0 0 2px 0; color: #555; }
+
+  /* El SVG se adapta al ancho disponible */
+  svg { width: 100%; height: auto; display: block; touch-action: none; cursor: ew-resize; }
+
+  .lectura { text-align: center; font-size: 13px; margin: 2px 0; }
+  .lectura b { color: #c0392b; }
+
+  input[type="range"] { width: 88%; display: block; margin: 0 auto; height: 14px; }
+
+  table { border-collapse: collapse; margin: 5px auto 2px auto; }
+  th, td { border: 1px solid #bbb; padding: 1px 2px; text-align: center; font-size: 11px; }
+  th { background: #eef; width: 24px; }
+  td input {
+    width: 38px; border: 1px solid #ccc; border-radius: 2px;
+    text-align: center; font-size: 11px; padding: 1px 0;
+  }
+  td input.bien { border: 2px solid #0b7a3b; background: #eaf7ef; }
+  td input.mal  { border: 2px solid #c0392b; background: #fdeeec; }
+
+  .botones { text-align: center; margin-top: 4px; }
+  button {
+    padding: 3px 10px; font-size: 12px; cursor: pointer;
+    border: 1px solid #888; border-radius: 3px; background: #f2f2f2; margin: 0 2px;
+  }
+  button:hover { background: #e4e4e4; }
+
+  .mensaje { text-align: center; min-height: 1.1em; font-size: 12px; margin-top: 3px; }
+  .correcto { color: #0b7a3b; font-weight: bold; }
+  .incorrecto { color: #c0392b; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }
+</style>
+</head>
+
+<body>
+<div id="envoltorio">
+
+
+<h1>¿Cuál es la altitud en cada km del recorrido?</h1>
+<p class="subtitulo">9.ª etapa de la Vuelta 2007: Huesca – Estación de esquí Cerler (168 km)</p>
+
+<!-- El script dibuja aquí la gráfica -->
+<div id="grafica"></div>
+
+<p class="lectura">
+  km recorridos: <b id="lectura-km">0.0</b> &nbsp;→&nbsp; altitud: <b id="lectura-alt">540</b> m
+</p>
+
+<input type="range" id="deslizador" min="0" max="168" step="0.2" value="0"
+       aria-label="Kilómetros recorridos">
+
+<!-- Tabla que el estudiante completa leyendo la gráfica -->
+<table>
+  <tr id="fila-km"><th>km</th></tr>
+  <tr id="fila-alt"><th>alt</th></tr>
+</table>
+
+<div class="botones">
+  <button type="button" id="btn-comprobar">Comprobar</button>
+  <button type="button" id="btn-borrar">Borrar</button>
+  <button type="button" id="btn-solucion">Ver solución</button>
+</div>
+
+<p class="mensaje" id="mensaje"></p>
+
+</div>
+<script>
+/* ------------------------------------------------------------------
+   DATOS DE LA ETAPA
+   KM[i] y ALTITUD[i] son los puntos kilométricos principales, tomados
+   del applet original. Entre dos puntos consecutivos la altitud se
+   interpola con una recta: la gráfica es una función definida a trozos.
+------------------------------------------------------------------ */
+const KM      = [0, 24, 34, 71, 87, 113, 121, 153, 160, 168];
+const ALTITUD = [540, 1280, 742, 1290, 630, 1020, 720, 1130, 1520, 1882];
+const NOMBRES = ["Huesca (salida)", "Monrepós", "", "Pto. del Serrablo", "Boltaña",
+                 "Collado de la Foradada", "Campo", "Benasque", "Cerler", "Meta"];
+
+/* ------------------------------------------------------------------
+   MEDIDAS DEL DIBUJO (en unidades del SVG)
+------------------------------------------------------------------ */
+const ANCHO = 560, ALTO = 185;
+const MARGEN = { izq: 38, der: 12, arr: 10, aba: 20 };
+const ANCHO_UTIL = ANCHO - MARGEN.izq - MARGEN.der;
+const ALTO_UTIL  = ALTO - MARGEN.arr - MARGEN.aba;
+const KM_MAX = 168, ALT_MAX = 2000;   // topes de los ejes
+
+let kmActual = 0;   // posición del punto rojo
+
+/* ------------------------------------------------------------------
+   CÁLCULOS
+------------------------------------------------------------------ */
+
+/* Altitud en un kilómetro cualquiera: busca el tramo que lo contiene y
+   hace la interpolación lineal entre sus dos extremos. */
+function altitudEn(km) {
+  if (km <= KM[0]) return ALTITUD[0];
+  if (km >= KM[KM.length - 1]) return ALTITUD[ALTITUD.length - 1];
+
+  for (let i = 0; i < KM.length - 1; i++) {
+    if (km >= KM[i] && km <= KM[i + 1]) {
+      const pendiente = (ALTITUD[i + 1] - ALTITUD[i]) / (KM[i + 1] - KM[i]);
+      return ALTITUD[i] + pendiente * (km - KM[i]);
+    }
+  }
+  return ALTITUD[0];
+}
+
+/* Paso de kilómetros y metros a coordenadas del dibujo */
+function coordX(km)  { return MARGEN.izq + (km / KM_MAX) * ANCHO_UTIL; }
+function coordY(alt) { return MARGEN.arr + ALTO_UTIL - (alt / ALT_MAX) * ALTO_UTIL; }
+
+/* ------------------------------------------------------------------
+   DIBUJO
+------------------------------------------------------------------ */
+function dibujar() {
+  const alt = altitudEn(kmActual);
+  let svg = '<svg viewBox="0 0 ' + ANCHO + ' ' + ALTO + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Rejilla vertical y marcas del eje horizontal, cada 20 km
+  for (let km = 0; km <= KM_MAX; km += 20) {
+    const x = coordX(km);
+    svg += '<line x1="' + x + '" y1="' + MARGEN.arr + '" x2="' + x +
+           '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="#e6e6e6"/>';
+    svg += '<text x="' + x + '" y="' + (ALTO - 7) + '" text-anchor="middle"' +
+           ' font-size="9" fill="#666">' + km + '</text>';
+  }
+
+  // Rejilla horizontal y marcas del eje vertical, cada 500 m
+  for (let a = 0; a <= ALT_MAX; a += 500) {
+    const y = coordY(a);
+    svg += '<line x1="' + MARGEN.izq + '" y1="' + y + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+           '" y2="' + y + '" stroke="#e6e6e6"/>';
+    svg += '<text x="' + (MARGEN.izq - 6) + '" y="' + (y + 3) + '" text-anchor="end"' +
+           ' font-size="9" fill="#666">' + a + '</text>';
+  }
+
+  // Ejes y sus rótulos
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + MARGEN.arr + '" x2="' + MARGEN.izq +
+         '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="#666"/>';
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + (MARGEN.arr + ALTO_UTIL) +
+         '" x2="' + (MARGEN.izq + ANCHO_UTIL) + '" y2="' + (MARGEN.arr + ALTO_UTIL) +
+         '" stroke="#666"/>';
+  svg += '<text x="' + (MARGEN.izq + ANCHO_UTIL - 4) + '" y="' + (ALTO - 7) +
+         '" font-size="9" fill="#666">km</text>';
+  svg += '<text x="3" y="' + (MARGEN.arr + 7) + '" font-size="9" fill="#666">m</text>';
+
+  // Relleno bajo el perfil y línea del perfil
+  let puntos = "";
+  for (let i = 0; i < KM.length; i++) {
+    puntos += coordX(KM[i]) + "," + coordY(ALTITUD[i]) + " ";
+  }
+  const base = coordX(KM_MAX) + "," + coordY(0) + " " + coordX(0) + "," + coordY(0);
+  svg += '<polygon points="' + puntos + base + '" fill="#ffd966" fill-opacity="0.65"/>';
+  svg += '<polyline points="' + puntos + '" fill="none" stroke="#0000aa" stroke-width="2"/>';
+
+  // Puntos kilométricos principales
+  for (let i = 0; i < KM.length; i++) {
+    svg += '<circle cx="' + coordX(KM[i]) + '" cy="' + coordY(ALTITUD[i]) +
+           '" r="2.5" fill="#0000aa"/>';
+  }
+
+  // Guías punteadas desde el punto rojo hasta los dos ejes
+  svg += '<line x1="' + coordX(kmActual) + '" y1="' + coordY(alt) + '" x2="' + coordX(kmActual) +
+         '" y2="' + coordY(0) + '" stroke="#c0392b" stroke-dasharray="3 3"/>';
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + coordY(alt) + '" x2="' + coordX(kmActual) +
+         '" y2="' + coordY(alt) + '" stroke="#c0392b" stroke-dasharray="3 3"/>';
+
+  // Punto rojo arrastrable
+  svg += '<circle cx="' + coordX(kmActual) + '" cy="' + coordY(alt) +
+         '" r="5" fill="#ff3300" stroke="#a02000"/>';
+
+  // Nombre del lugar cuando el punto está cerca de un punto principal
+  for (let i = 0; i < KM.length; i++) {
+    if (Math.abs(kmActual - KM[i]) < 1.5 && NOMBRES[i] !== "") {
+      const x = Math.min(coordX(KM[i]) + 8, ANCHO - 130);
+      svg += '<text x="' + x + '" y="' + (coordY(ALTITUD[i]) - 9) +
+             '" font-size="11" font-weight="bold" fill="#c0392b">' + NOMBRES[i] + '</text>';
+    }
+  }
+
+  svg += '</svg>';
+  document.getElementById("grafica").innerHTML = svg;
+
+  document.getElementById("lectura-km").textContent = kmActual.toFixed(1);
+  document.getElementById("lectura-alt").textContent = Math.round(alt);
+}
+
+/* ------------------------------------------------------------------
+   INTERACCIÓN: arrastrar sobre la gráfica o mover el deslizador
+------------------------------------------------------------------ */
+
+/* Convierte la posición del puntero en un valor de kilómetros. Hay que
+   reescalar porque el SVG se muestra más pequeño o más grande que su
+   viewBox según el ancho disponible. */
+function kmDesdePuntero(evento, svg) {
+  const caja = svg.getBoundingClientRect();
+  const xEnSVG = (evento.clientX - caja.left) * (ANCHO / caja.width);
+  const km = ((xEnSVG - MARGEN.izq) / ANCHO_UTIL) * KM_MAX;
+  return Math.min(KM_MAX, Math.max(0, km));
+}
+
+function moverA(km) {
+  kmActual = km;
+  document.getElementById("deslizador").value = km;
+  dibujar();
+}
+
+const zonaGrafica = document.getElementById("grafica");
+let arrastrando = false;
+
+zonaGrafica.addEventListener("pointerdown", function (evento) {
+  const svg = zonaGrafica.querySelector("svg");
+  arrastrando = true;
+  moverA(kmDesdePuntero(evento, svg));
+});
+
+zonaGrafica.addEventListener("pointermove", function (evento) {
+  if (!arrastrando) return;
+  moverA(kmDesdePuntero(evento, zonaGrafica.querySelector("svg")));
+});
+
+window.addEventListener("pointerup", function () { arrastrando = false; });
+window.addEventListener("pointercancel", function () { arrastrando = false; });
+
+document.getElementById("deslizador").addEventListener("input", function (evento) {
+  kmActual = parseFloat(evento.target.value);
+  dibujar();
+});
+
+/* ------------------------------------------------------------------
+   TABLA PARA COMPLETAR
+------------------------------------------------------------------ */
+function construirTabla() {
+  const filaKm  = document.getElementById("fila-km");
+  const filaAlt = document.getElementById("fila-alt");
+
+  for (let i = 0; i < KM.length; i++) {
+    filaKm.insertAdjacentHTML("beforeend", "<td>" + KM[i] + "</td>");
+    filaAlt.insertAdjacentHTML("beforeend",
+      '<td><input type="text" inputmode="numeric" data-indice="' + i + '" autocomplete="off"></td>');
+  }
+}
+
+function comprobar() {
+  const casillas = document.querySelectorAll("#fila-alt input");
+  let aciertos = 0, respondidas = 0;
+
+  casillas.forEach(function (casilla) {
+    const esperado = ALTITUD[casilla.dataset.indice];
+    const escrito = casilla.value.trim();
+    casilla.className = "";
+    if (escrito === "") return;
+    respondidas++;
+    if (parseInt(escrito, 10) === esperado) {
+      casilla.className = "bien";
+      aciertos++;
+    } else {
+      casilla.className = "mal";
+    }
+  });
+
+  const mensaje = document.getElementById("mensaje");
+  if (respondidas === 0) {
+    mensaje.textContent = "Completa la fila de altitudes leyendo la gráfica.";
+    mensaje.className = "mensaje";
+  } else if (aciertos === casillas.length) {
+    mensaje.textContent = "¡Correcto! Las diez altitudes están bien.";
+    mensaje.className = "mensaje correcto";
+  } else {
+    mensaje.textContent = "Vas " + aciertos + " de " + casillas.length +
+                          ". Revisa las casillas en rojo.";
+    mensaje.className = "mensaje incorrecto";
+  }
+}
+
+function borrar() {
+  document.querySelectorAll("#fila-alt input").forEach(function (casilla) {
+    casilla.value = "";
+    casilla.className = "";
+  });
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "";
+  mensaje.className = "mensaje";
+}
+
+function verSolucion() {
+  document.querySelectorAll("#fila-alt input").forEach(function (casilla) {
+    casilla.value = ALTITUD[casilla.dataset.indice];
+    casilla.className = "bien";
+  });
+  const mensaje = document.getElementById("mensaje");
+  mensaje.textContent = "Estas son las altitudes de los puntos principales.";
+  mensaje.className = "mensaje";
+}
+
+document.getElementById("btn-comprobar").addEventListener("click", comprobar);
+document.getElementById("btn-borrar").addEventListener("click", borrar);
+document.getElementById("btn-solucion").addEventListener("click", verSolucion);
+
+/* ------------------------------------------------------------------
+   ARRANQUE
+------------------------------------------------------------------ */
+construirTabla();
+dibujar();
+</script>
+
+
+<script>
+/* Ajusta la escala del contenido al alto de la ventana del iframe */
+(function () {
+  const envoltorio = document.getElementById("envoltorio");
+
+  function ajustar() {
+    const altoReal = envoltorio.offsetHeight;
+    if (!altoReal) return;
+    const factor = Math.min(1, (window.innerHeight - 4) / altoReal);
+    envoltorio.style.transform = "scale(" + factor + ")";
+  }
+
+  window.addEventListener("resize", ajustar);
+  // El contenido cambia de alto al generar ejercicios o gráficas nuevas
+  if (window.ResizeObserver) new ResizeObserver(ajustar).observe(envoltorio);
+  ajustar();
+})();
+</script>
+
+</body>
+</html>

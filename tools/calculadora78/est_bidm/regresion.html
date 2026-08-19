@@ -1,0 +1,205 @@
+﻿<!DOCTYPE HTML>
+<html lang="es">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Estadística bidimensional</title>
+<style type="text/css">
+.normal {
+	font-weight: bold;
+	color: #FFF;
+	text-align: center;
+}
+#wrapper #estad table tr td .accordionButton {
+	font-weight: normal;
+}
+ 
+
+
+</style>
+<head>  
+<script type="text/javascript" src="recta_regresion.js"></script>
+<script type="text/javascript" src="cubi_regresion.js"></script>
+<script type="text/javascript" src="canvasjs.min.js"></script>
+<script type="text/javascript" src="para_regresion.js"></script>
+<script type="text/javascript" src="pote_regresion.js"></script>
+<script type="text/javascript" src="expo_regresion.js"></script>
+<script type="text/javascript" src="loga_regresion.js"></script>
+<script type="text/javascript" src="para_borramemoria.js"></script>
+<script type="text/javascript" src="mostrargraf.js"></script>
+<script type="text/javascript" src="colocame_1.js"></script>
+
+
+<link rel="stylesheet" type="text/css" href="estilos.css">
+
+
+        
+<script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="jquery.flot.js"></script>
+        <script type="text/javascript" src="general.js"></script>
+        <link href="estilo.css" rel="stylesheet" type="text/css" />
+
+
+</head>
+<body bgcolor="#F7F7F7">
+<script>
+function myFunction()
+{
+   
+}
+</script>
+<div id="wrapper" style="width:300px; display: yes; position: relative; left:0px; background:#F7F7F7;"> 
+  
+  <div align="center"><font color="#003399" size="4" face="Arial, Helvetica, sans-serif"><strong>Regresión</strong></font></div>
+  <div class="accordionButton" valign="top"   style="width: 300px; height: 40px; background-image: url(images/botong1.png); font-size: 16px; text-align: center; color: #FFF;"></div>
+  <div class="accordionContent">
+  <form action="datos" name="estadistica" id="estad">
+    
+    <table width="273" border="2" align="center">
+      <tr> 
+        <td bgcolor="#333333">
+<label class="menuda">Datos X</label></td>
+        <td align="center" bgcolor="#333333"> 
+          <textarea name="textarea" cols="25" rows="2" class="box2" id="entradax">1.9,2.2,2.9,3.6,3.8,4.6,5.5
+                                      </textarea> 
+          <label class="menuda">Introduce los datos separados por una coma</label></td>
+      </tr>
+      <tr> 
+        <td bgcolor="#333333">
+<label id="error1" class="error"></label> <label class="menuda">Datos 
+          Y </label></td>
+        <td align="center" bgcolor="#333333"> 
+          <label class="menuda"></label> <textarea name="textarea2" cols="25" rows="2" class="box2" id="entraday">5.5,7.4,9.8,11.6,11.6,12.2,11.2</textarea> 
+          <label class="menuda">Introduce los datos separados por una coma</label></td>
+      </tr>
+      <tr> 
+        <td width="21%" bgcolor="#333333">
+<label class="menuda"> </label> <label class="menuda">Frecuencia</label> 
+        </td>
+        <td width="79%" align="center" bgcolor="#333333"> 
+          <textarea name="textarea3" cols="25" rows="2" class="box2" id="frecuencia">1,1,1,1,1,1,1</textarea> 
+          <span class="menuda">Introduce los datos separados por una coma</span></td>
+      </tr>
+      <tr> 
+        <td colspan="3" align="center" valign="top" bgcolor="#999999"> 
+          <input name="button2222" type="button" class="small" id="button2" onMouseDown="borramemoria()" value="AC" /> 
+          <input name="button8" type="button" class="small" id="button8" onClick="coloca_1()" value="Frecuencias=1" /></td>
+      </tr>
+    </table>
+	</div>
+	<div class="accordionButton" style="width: 300px; height: 40px; background-image: url(images/botong2.png); font-size: 16px; text-align: center; color: #FFF;"></div>
+          <div class="accordionContent"> 
+    
+  <table align="center">
+    <tr> 
+          <td colspan="3" align="center" valign="top"> <input name="button" type="button" class="lineal" id="button" onClick="calculos()" 
+        value="Lineal                                           "/>
+            <input name="button3" type="button" class="parabola" id="button32" onClick="parabola()" 
+        value="Cuadrático                                   "/>
+            <input name="button4" type="button" class="cubica" id="button42" onClick="calculos_cubi()" 
+        value="Cúbico                                          "/> 
+            <input name="button5" type="button" class="exponencial" id="button5" onClick="calculos_expo()" 
+		value="Exponencial                                  "/>
+            <input name="button6" type="button" class="potencial" id="button6" onClick="calculos_pote()" 
+		value="Potencial                                       "/>
+            <input name="button7" type="button" class="logaritmica" id="button7" onClick="calculos_loga()" 
+		value="Logarítmico                                   "/>
+          </td>
+      </tr>
+    </table>
+	</div>
+	
+    <div class="accordionButton" style="height: 40px; width: 300px; background-image: url(images/botong3.png); font-size: 16px;  text-align: center; color: #FFF;"></div>
+    <div class="accordionContent"> 
+      
+    <table width="289" border="1" align="center" bgcolor="#FFCC33">
+      <tr> 
+          <td colspan="2"><font id="res" class="output">Resultados. Tipo de ajuste:
+            <input name="tipo" type="text" id="tipo" size="10">
+            </font></td>
+        </tr>
+        <tr> 
+          <td width="133" class="menuda"><label>1. N&uacute;m. de datos </label></td>
+          <td width="144"><input name="text" type="text" class="resultados" id="result1" /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>2. Media de X = </label></td>
+          <td><input name="text2" type="text" class="resultados" id="result2" /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>3. Media de Y = </label></td>
+          <td><input name="text3" type="text" class="resultados" id="result3" /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>4. Covarianza = </label></td>
+          <td><input name="text4" type="text" class="resultados" id="result4" /> 
+          </td>
+        </tr>
+        <td class="menuda"><label>5. Coef. determinac. R<sup>2</sup>=</label></td>
+        <td><input name="text5" type="text" class="resultados" id="result5" /> 
+        </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>6. Coef. de correlación= </label></td>
+          <td><input name="text6" type="text" class="resultados" id="result6" value=" " /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>7. a =</label></td>
+          <td><input name="text7" type="text" class="resultados" id="result7" value=" " /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda">8. b = </td>
+          <td><input name="text8" type="text" class="resultados" id="result8" value=" " /></td>
+        </tr>
+        <tr> 
+          <td class="menuda">9. c = </td>
+          <td><input name="text9" type="text" class="resultados" id="result9" value=" " /></td>
+        </tr>
+        <tr> 
+          <td class="menuda">10. d = </td>
+          <td><input name="text10" type="text" class="resultados" id="result10" value=" " /></td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>11. Error pendiente (b)= </label></td>
+          <td><input name="text11" type="text" class="resultados" id="result11" /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda"><label>12. Error ordenada (a)= </label></td>
+          <td><input name="text12" type="text" class="resultados" id="result12" /> 
+          </td>
+        </tr>
+        <tr> 
+          <td class="menuda">&nbsp;</td>
+          <td align="center"><input type="button" class="small" value="Gráfica" onClick="Mostrargrafo()"></td>
+        </tr>
+        <tr> 
+      </table>
+    </div>
+    <div style="visibility:visible;" id="res_area" > </div>
+  </form>
+  
+<div id="grafo" style="height: 350px; width: 300px; display: none; position: absolute; left: 0px; top: 0px;"> 
+  <table width="300" height="350" border="1"  bgcolor="#009900" bordercolor="#FF9900">
+      <tr> 
+        <td height="100%">
+
+<div id="chartContainer">
+
+</div>
+</td>
+      </tr>
+      <tr> 
+        <td align="center"><input type="button" class="small" value="Oculta la gráfica" onClick="Ocultargrafo()"></td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>

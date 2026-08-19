@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Jeroglíficos como introducción a las funciones</title>
+  <style type="text/css">
+    .auto-style1 {
+      font-family: Verdana, Arial, Helvetica, sans-serif, 'Lato';
+      color: #FFFFFF;
+    }
+
+    .container {
+      width: 420px;
+      height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 0;
+      margin: auto;
+    }
+
+    -->
+  </style>
+  <script type="text/javascript" src="lib/descartes-min.js" charset="utf-8"></script>
+</head>
+
+<body class="container">
+
+  <div class="container">
+    <ajs name="probando" code="Descartes" width="420" height="360">
+      <param name="tamaño" value="420x360">
+      <param name="decimal_symbol" value=",">
+      <param name="nombre" value="probando">
+      <param name="Versión" value="5.5">
+      <param name="editable" value="sí">
+      <param name="Idioma" value="español">
+      <param name="Botones" value="créditos=no config=no inicio=no limpiar=no filas_norte=0 filas_sur=0 ancho_este=150 ancho_oeste=150 alto=23 ">
+      <param name="E_01" value="tipo='R2' id='E0' ancho='100%' alto='100%' fijo='sí' escala='20' red='no' red10='no' ejes='no' sensible_a_los_movimientos_del_ratón='sí' ">
+      <param name="E_02" value="tipo='R2' id='bien' x='150' ancho='100%' alto='10%' dibujar-si='(corrige=1)&(total=4)' fondo='008200' red='no' red10='no' ejes='no' ">
+      <param name="E_03" value="tipo='R2' id='mal' x='150' ancho='100%' alto='10%' dibujar-si='(corrige=1)&(total<4)' fondo='ff0000' red='no' red10='no' ejes='no' ">
+      <param name="C_01" value="id='adelante' interfaz='botón' tipo='numérico' región='interior' espacio='E0' expresión='(40,325,25,25)' color='222222' color-int='f0f8ff' fuente puntos='19' imagen='img/siguiente.png' acción='calcular' parámetro='pag=pag+1' dibujar-si='pag<2' ">
+      <param name="C_02" value="id='atras' interfaz='botón' tipo='numérico' región='interior' espacio='E0' expresión='(10,325,25,25)' color='222222' color-int='f0f8ff' fuente puntos='19' imagen='img/anterior.png' acción='calcular' parámetro='pag=pag-1\ncorrige=0\n' dibujar-si='pag>=1' ">
+      <param name="C_03" value="id='letrap' tipo='gráfico' espacio='E0' color='0000ff' color-int='ff0000' tamaño='0' expresión='(-9,-5)' imagen='img/letra_p.png' dibujar-si='pag>=2' ">
+      <param name="C_04" value="id='letrara' tipo='gráfico' espacio='E0' color='0000ff' color-int='ff0000' tamaño='4' expresión='(-6,-5)' imagen='img/letra_ra.png' dibujar-si='pag>=2' ">
+      <param name="C_05" value="id='letrams' tipo='gráfico' espacio='E0' color='0000ff' color-int='ff0000' tamaño='4' expresión='(-3,-5)' imagen='img/letra_ms.png' dibujar-si='pag>=2' ">
+      <param name="C_06" value="id='letrao' tipo='gráfico' espacio='E0' color='0000ff' color-int='ff0000' tamaño='4' expresión='(0,-5)' imagen='img/letra_o.png' dibujar-si='pag>=2' ">
+      <param name="C_07" value="id='letraq' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(3,-5)' imagen='img/letra_q.png' dibujar-si='pag>=2' ">
+      <param name="C_08" value="id='letrai' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(6,-5)' imagen='img/letra_i.png' dibujar-si='pag>=2' ">
+      <param name="C_09" value="id='letras' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(9,-5)' imagen='img/letra_s.png' dibujar-si='pag>=2' ">
+      <param name="C_10" value="id='letray' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(-9,-6.5)' imagen='img/letra_y.png' dibujar-si='pag>=2' ">
+      <param name="C_11" value="id='letral' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(-6,-6.5)' imagen='img/letra_l.png' dibujar-si='pag>=2' ">
+      <param name="C_12" value="id='letrad' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(-3,-6.5)' imagen='img/letra_d.png' dibujar-si='pag>=2' ">
+      <param name="C_13" value="id='letram' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(0,-6.5)' imagen='img/letra_m.png' dibujar-si='pag>=2' ">
+      <param name="C_14" value="id='letrathot' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(3,-6.5)' imagen='img/letra_thot.png' dibujar-si='pag>=2' ">
+      <param name="C_15" value="id='letrak' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(6,-6.5)' imagen='img/letra_k.png' dibujar-si='pag>=2' ">
+      <param name="C_16" value="id='letran' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(9,-6.5)' imagen='img/letra_n.png' dibujar-si='pag>=2' ">
+      <param name="C_17" value="id='letrat' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(9,-8)' imagen='img/letra_t.png' dibujar-si='pag>=2' ">
+      <param name="C_18" value="id='letraa' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(6,-8)' imagen='img/letra_a.png' dibujar-si='pag>=2' ">
+      <param name="C_19" value="id='letrar' tipo='gráfico' espacio='E0' color='azul' color-int='rojo' tamaño='4' expresión='(3,-8)' imagen='img/letra_r.png' dibujar-si='pag>=2' ">
+      <param name="C_20" value="id='corregir' interfaz='botón' tipo='numérico' región='interior' espacio='E0' expresión='(150,10,90,25)' color='222222' color-int='f0f8ff' fuente puntos='19' imagen='img/comprobar.png' acción='calcular' parámetro='corrige=1' dibujar-si='(pag>=2)&(corrige=0)' ">
+      <param name="C_21" value="id='nuevo' interfaz='botón' tipo='numérico' región='interior' espacio='E0' expresión='(50,10,90,25)' color='222222' color-int='f0f8ff' fuente puntos='19' imagen='img/otroejemplo.png' acción='calcular' parámetro='otro()' dibujar-si='(pag>=2)&(corrige=1)' ">
+      <param name="A_01" value="id='INICIO' algoritmo='sí' evaluar='una-sola-vez' hacer='permuta()' mientras='i' ">
+      <param name="A_02" value="id='CALCULOS' algoritmo='sí' evaluar='siempre' hacer='corrige()' ">
+      <param name="A_03" value="id='pi' vector='sí' evaluar='una-sola-vez' tamaño='17' expresión='pi[0]=0;pi[1]=1;pi[2]=2;pi[3]=3;pi[4]=4;pi[5]=5;pi[6]=6;pi[7]=7;pi[8]=8;pi[9]=9;pi[10]=10;pi[11]=11;pi[12]=12;pi[13]=13;pi[14]=14;pi[15]=15;pi[16]=16;' tipo='vector' ">
+      <param name="A_04" value="id='permuta()' algoritmo='sí' expresión='x' inicio='i=0' hacer='j=ent(16*rnd);k=ent(16*rnd);paso=pi[j];pi[j]=pi[k];pi[k]=paso' mientras='i<=100' tipo='función' ">
+      <param name="A_05" value="id='sol' vector='sí' evaluar='una-sola-vez' tamaño='17' expresión='sol[0]=letrap.y;sol[1]=letrara.y;sol[2]=letrams.y;sol[3]=letrao.y;sol[4]=letraq.y;sol[5]=letrai.y;sol[6]=letras.y;sol[7]=letray.y;sol[8]=letral.y;sol[9]=letrad.y;sol[10]=letram.y;sol[11]=letrathot.y;sol[12]=letrak.y;sol[13]=letran.y;sol[14]=letrat.y;sol[15]=letraa.y;sol[16]=letrar.y;' tipo='vector' ">
+      <param name="A_06" value="id='corrige()' algoritmo='sí' expresión='x' hacer='sol[0]=letrap.y;sol[1]=letrara.y;sol[2]=letrams.y;sol[3]=letrao.y;sol[4]=letraq.y;sol[5]=letrai.y;sol[6]=letras.y;sol[7]=letray.y;sol[8]=letral.y;sol[9]=letrad.y;sol[10]=letram.y;sol[11]=letrathot.y;sol[12]=letrak.y;sol[13]=letran.y;sol[14]=letrat.y;sol[15]=letraa.y;sol[16]=letrar.y;sol[0]=letrap.y;sol[1]=letrara.y;sol[2]=letrams.y;sol[3]=letrao.y;sol[4]=letraq.y;sol[5]=letrai.y;sol[6]=letras.y;sol[7]=letray.y;sol[8]=letral.y;sol[9]=letrad.y;sol[10]=letram.y;sol[11]=letrathot.y;sol[12]=letrak.y;sol[13]=letran.y;sol[14]=letrat.y;sol[15]=letraa.y;sol[16]=letrar.y;c0=(abs(sol[pi[0]]-3.5)<0.2)?1:0;c1=(abs(sol[pi[1]]-1.5)<0.2)?1:0;c2=(abs(sol[pi[2]]+0.5)<0.2)?1:0;c3=(abs(sol[pi[3]]+2.5)<0.2)?1:0;total=c0+c1+c2+c3' tipo='función' ">
+      <param name="A_07" value="id='otro()' algoritmo='sí' expresión='x' hacer='permuta();c0=0;c1=0;c2=0;c3=0;corrige=0;letrap.x=-9;letrap.y=-5;letrara.x=-6;letrara.y=-5;letrams.x=-3;letrams.y=-5;letrao.x=0;letrao.y=-5;letraq.x=3;letraq.y=-5;letrai.x=6;letrai.y=-5;letras.x=9;letras.y=-5;letray.x=-9;letray.y=-6.5;letral.x=-6;letral.y=-6.5;letrad.x=-3;letrad.y=-6.5;letram.x=0;letram.y=-6.5;letrathot.x=3;letrathot.y=-6.5;letrak.x=6;letrak.y=-6.5;letran.x=9;letran.y=-6.5;letrat.x=9;letrat.y=-8;letraa.x=6;letraa.y=-8;letrar.x=3;letrar.y=-8;' tipo='función' ">
+      <param name="G_01" value="espacio='E0' tipo='imagen' dibujar-si='pag=1' coord_abs='sí' expresión='(40,80)' archivo='img/cartuchos.png' ">
+      <param name="G_02" value="espacio='E0' tipo='texto' color='0000ff' dibujar-si='pag=1' coord_abs='sí' expresión='[50,10]' texto='{\rtf1\uc0{\fonttbl\f0\fcharset0 Arial;}{\colortbl\red0\green0\blue0;}\cf0\f0\fs24 Algunos de los «cartuchos» que ayudaron a descifrar las \par\cf0\f0\fs24 equivalencias  fonéticas  de la escritura egipcia.  Trata de \par\cf0\f0\fs24 encontrar  la correspondencia entre  cada  símbolo  y   la \par\cf0\f0\fs24 letra o grupo de letras.}' ancho='1' negrita='sí' fuente puntos='15' align='a_left' anchor='a_top_left' ">
+      <param name="G_03" value="espacio='E0' tipo='texto' color='0000ff' dibujar-si='pag=0' coord_abs='sí' expresión='[10,10]' texto='{\rtf1\uc0{\fonttbl\f0\fcharset0 Arial;\f1\fcharset0 Courier New;}{\colortbl\red0\green0\blue0;\red0\green0\blue255;}\cf0\f0\fs24 La  Piedra  Roseta encierra  un documento escrito  de tres  formas dis-\par\cf0\f0\fs24 tintas. En la parte superior  (jeroglíficos),  en la central,  (demótico) dos \par\cf0\f0\fs24 formas de escritura de una lengua muerta, el egipcio.  En  la parte  infe-\par\cf0\f0\fs24 rior aparece la misma inscripción en griego. Esto último y la genialidad \par\cf0\f0\fs24 de Champollion  permitió  encontrar  las claves  de la correspondencia \par\cf0\f0\fs24 entre los signos jeroglíficos y sus imágenes fonéticas.\par\cf1\f1\fs24 \par\cf1\f1\fs24 \par\cf1\f1\fs24 }' ancho='1' negrita='sí' fuente puntos='15' align='a_left' anchor='a_top_left' ">
+      <param name="G_04" value="espacio='E0' tipo='imagen' dibujar-si='pag=0' coord_abs='sí' expresión='(110,110)' archivo='img/roseta1.png' ">
+      <param name="G_05" value="espacio='E0' tipo='imagen' dibujar-si='(pag=0)&(sqrt((mouse_x+6.5)^2+(mouse_y-2.5)^2)<1)' coord_abs='sí' expresión='(110,2)' archivo='img/roseta_det1.png' ">
+      <param name="G_06" value="espacio='E0' tipo='imagen' dibujar-si='(pag=0)&(sqrt((mouse_x+6.5)^2+(mouse_y+2)^2)<1)' coord_abs='sí' expresión='(110,2)' archivo='img/roseta_det2.png' ">
+      <param name="G_07" value="espacio='E0' tipo='imagen' dibujar-si='(pag=0)&(sqrt((mouse_x+6.5)^2+(mouse_y+7)^2)<1)' coord_abs='sí' expresión='(110,2)' archivo='img/roseta_det3.png' ">
+      <param name="G_08" value="espacio='E0' tipo='imagen' dibujar-si='pag=0' coord_abs='sí' expresión='(67,114)' archivo='img/lupa.png' ">
+      <param name="G_09" value="espacio='E0' tipo='imagen' dibujar-si='pag=0' coord_abs='sí' expresión='(67,210)' archivo='img/lupa.png' ">
+      <param name="G_10" value="espacio='E0' tipo='imagen' dibujar-si='pag=0' coord_abs='sí' expresión='(67,305)' archivo='img/lupa.png' ">
+      <param name="G_11" value="espacio='E0' tipo='imagen' dibujar-si='pag>=2' coord_abs='sí' expresión='(40,80)' archivo='img/conjunto_a.png' ">
+      <param name="G_12" value="espacio='E0' tipo='imagen' dibujar-si='pag>=2' coord_abs='sí' expresión='(260,80)' archivo='img/conjunto_b.png' ">
+      <param name="G_13" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=0)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_p.png' ">
+      <param name="G_14" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=1)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_ra.png' ">
+      <param name="G_15" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=2)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_ms.png' ">
+      <param name="G_16" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=3)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_o.png' ">
+      <param name="G_17" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=4)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_q.png' ">
+      <param name="G_18" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=5)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_i.png' ">
+      <param name="G_19" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=6)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_s.png' ">
+      <param name="G_20" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=7)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_y.png' ">
+      <param name="G_21" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=8)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_l.png' ">
+      <param name="G_22" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=9)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_d.png' ">
+      <param name="G_23" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=10)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_m.png' ">
+      <param name="G_24" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=11)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_thot.png' ">
+      <param name="G_25" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=12)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_k.png' ">
+      <param name="G_26" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=13)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_n.png' ">
+      <param name="G_27" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=14)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_t.png' ">
+      <param name="G_28" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=15)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_a.png' ">
+      <param name="G_29" value="espacio='E0' tipo='imagen' dibujar-si='(pag>=2)&(pi[s]=16)' coord_abs='sí' expresión='(70,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' archivo='img/jero_r.png' ">
+      <param name="G_30" value="espacio='E0' tipo='texto' color='0000ff' dibujar-si='pag>=2' coord_abs='sí' expresión='[20,40]' texto='{\rtf1\uc0{\fonttbl\f0\fcharset0 Arial;\f1\fcharset0 Courier New;}{\colortbl\red0\green0\blue0;\red0\green0\blue255;}\cf0\f0\fs30 Arrastra  con  el ratón  la letra o grupo de letras hasta \par\cf0\f0\fs30 los huecos y después comprueba tu correspondencia.\par\cf0\f0\fs30 \par\cf1\f1\fs24 }' ancho='1' negrita='sí' fuente puntos='14' align='a_left' anchor='a_top_left' ">
+      <param name="G_31" value="espacio='E0' tipo='flecha' color='rojo' dibujar-si='pag>=2' coord_abs='sí' expresión='(120,110)(290,110)' ancho='2' punta='3' flecha='rojo' ">
+      <param name="G_32" value="espacio='E0' tipo='flecha' color='rojo' dibujar-si='pag>=2' coord_abs='sí' expresión='(120,150)(290,150)' ancho='2' punta='3' flecha='rojo' ">
+      <param name="G_33" value="espacio='E0' tipo='flecha' color='rojo' dibujar-si='pag>=2' coord_abs='sí' expresión='(120,190)(290,190)' ancho='2' punta='3' flecha='rojo' ">
+      <param name="G_34" value="espacio='E0' tipo='flecha' color='rojo' dibujar-si='pag>=2' coord_abs='sí' expresión='(120,230)(290,230)' ancho='2' punta='3' flecha='rojo' ">
+      <param name="G_35" value="espacio='E0' tipo='punto' color='85ffc800' dibujar-si='pag>=2' coord_abs='no' expresión='(5.5,3.5)' tamaño='17' ">
+      <param name="G_36" value="espacio='E0' tipo='punto' color='85ffc800' dibujar-si='pag>=2' coord_abs='no' expresión='(5.5,1.5)' tamaño='17' ">
+      <param name="G_37" value="espacio='E0' tipo='punto' color='85ffc800' dibujar-si='pag>=2' coord_abs='no' expresión='(5.5,-0.5)' tamaño='17' ">
+      <param name="G_38" value="espacio='E0' tipo='punto' color='85ffc800' dibujar-si='pag>=2' coord_abs='no' expresión='(5.5,-2.5)' tamaño='17' ">
+      <param name="G_39" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrap.x,letrap.y)' tamaño='17' ">
+      <param name="G_40" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrara.x,letrara.y)' tamaño='17' ">
+      <param name="G_41" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrams.x,letrams.y)' tamaño='17' ">
+      <param name="G_42" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrao.x,letrao.y)' tamaño='17' ">
+      <param name="G_43" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letraq.x,letraq.y)' tamaño='17' ">
+      <param name="G_44" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrai.x,letrai.y)' tamaño='17' ">
+      <param name="G_45" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letras.x,letras.y)' tamaño='17' ">
+      <param name="G_46" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letray.x,letray.y)' tamaño='17' ">
+      <param name="G_47" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letral.x,letral.y)' tamaño='17' ">
+      <param name="G_48" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrad.x,letrad.y)' tamaño='17' ">
+      <param name="G_49" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letram.x,letram.y)' tamaño='17' ">
+      <param name="G_50" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrathot.x,letrathot.y)' tamaño='17' ">
+      <param name="G_51" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrak.x,letrak.y)' tamaño='17' ">
+      <param name="G_52" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letran.x,letran.y)' tamaño='17' ">
+      <param name="G_53" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrat.x,letrat.y)' tamaño='17' ">
+      <param name="G_54" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letraa.x,letraa.y)' tamaño='17' ">
+      <param name="G_55" value="espacio='E0' tipo='punto' color='fffada' dibujar-si='pag>=2' coord_abs='no' expresión='(letrar.x,letrar.y)' tamaño='17' ">
+      <param name="G_56" value="espacio='bien' tipo='texto' color='0000ff' dibujar-si='(corrige=1)&(total=4)' coord_abs='sí' expresión='[35,5]' texto='{\rtf1\uc0{\fonttbl\f0\fcharset0 Times New Roman;\f1\fcharset0 Arial;\f2\fcharset0 Courier New;}{\colortbl\red255\green255\blue255;\red0\green0\blue255;}\f1\fs52\b\cf0 CORRECTO\cf1\f2\fs24\b0\par}' ancho='1' negrita='sí' fuente puntos='26' align='a_left' anchor='a_top_left' ">
+      <param name="G_57" value="espacio='mal' tipo='texto' color='0000ff' dibujar-si='(corrige=1)&(total<4)' coord_abs='sí' expresión='[25,5]' texto='{\rtf1\uc0{\fonttbl\f0\fcharset0 Times New Roman;\f1\fcharset0 Arial;\f2\fcharset0 Courier New;}{\colortbl\red255\green255\blue255;\red0\green0\blue255;}\f1\fs52\b\cf0 Prueba otra vez\cf1\f2\fs24\b0\par \par}' ancho='1' negrita='sí' fuente puntos='26' align='a_left' anchor='a_top_left' ">
+      <param name="G_58" value="espacio='E0' tipo='texto' color='20303a' dibujar-si='0' coord_abs='sí' expresión='(20,100+40*s)' familia='s' s.intervalo='[0,3]' s.pasos='3' texto='[pi[s]]' decimales='0' ancho='1' align='a_left' anchor='a_top_left' ">
+      <param name="G_59" value="espacio='E0' tipo='texto' color='20303a' dibujar-si='0' coord_abs='sí' expresión='[180,95]' texto='c0=[c0]' decimales='0' ancho='1' align='a_left' anchor='a_top_left' ">
+      <param name="G_60" value="espacio='E0' tipo='texto' color='20303a' dibujar-si='0' coord_abs='sí' expresión='[180,135]' texto='c1=[c1]' decimales='0' ancho='1' align='a_left' anchor='a_top_left' ">
+      <param name="G_61" value="espacio='E0' tipo='texto' color='20303a' dibujar-si='0' coord_abs='sí' expresión='[180,175]' texto='c2=[c2]' decimales='0' ancho='1' align='a_left' anchor='a_top_left' ">
+      <param name="G_62" value="espacio='E0' tipo='texto' color='20303a' dibujar-si='0' coord_abs='sí' expresión='[180,215]' texto='c3=[c3]' decimales='0' ancho='1' align='a_left' anchor='a_top_left' ">
+      <param name="G_63" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c0=1)' coord_abs='sí' expresión='(385,95)' archivo='img/bien.png' ">
+      <param name="G_64" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c0=0)' coord_abs='sí' expresión='(385,95)' archivo='img/mal.png' ">
+      <param name="G_65" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c1=1)' coord_abs='sí' expresión='(385,135)' archivo='img/bien.png' ">
+      <param name="G_66" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c1=0)' coord_abs='sí' expresión='(385,135)' archivo='img/mal.png' ">
+      <param name="G_67" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c2=1)' coord_abs='sí' expresión='(385,175)' archivo='img/bien.png' ">
+      <param name="G_68" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c2=0)' coord_abs='sí' expresión='(385,175)' archivo='img/mal.png' ">
+      <param name="G_69" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c3=1)' coord_abs='sí' expresión='(385,215)' archivo='img/bien.png' ">
+      <param name="G_70" value="espacio='E0' tipo='imagen' dibujar-si='(corrige=1)&(c3=0)' coord_abs='sí' expresión='(385,215)' archivo='img/mal.png' ">
+    </ajs>
+  </div>
+
+
+
+</body>
+</html>

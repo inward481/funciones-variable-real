@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=yes,minimal-ui">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <meta name="author" content="Juan Sebastián Romero Burgos">
+  <meta name="description" content="Libro interactivo de introducción a las funciones de variable real: conjuntos, funciones, dominio, imagen, monotonía y continuidad, con recursos interactivos propios y ejercicios resueltos.">
+
+  <title>Introducción a las Funciones de Variable Real</title>
+
+  <!-- configuración del libro: numera secciones y figuras automáticamente -->
+  <script>
+  window.book_config = {
+    auto_numerate_sections_and_figures: true,
+  }
+  </script>
+
+  <!-- núcleo del libro interactivo (plantilla de Joel Espinosa Longi) -->
+  <link rel="stylesheet" href="book/css/style.css" type="text/css">
+  <script type="text/JavaScript" src="book/js/book.js" charset="utf-8"></script>
+
+  <!-- personalización propia: fuentes y estilos -->
+  <link rel="stylesheet" href="extra/fonts.css" type="text/css">
+  <link rel="stylesheet" href="extra/style.css" type="text/css">
+
+  <!-- KaTeX: renderiza las fórmulas escritas entre $...$ o \(...\) -->
+  <link rel="stylesheet" type="text/css" href="extra/katex/katex.min.css" />
+  <script src="extra/katex/katex.min.js"></script>
+  <script src="extra/katex/auto-render.min.js"></script>
+  <script src="extra/katex/mhchem.min.js"></script>
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$",  right: "$",  display: false},
+        {left: "\\[", right: "\\]", display: true},
+        {left: "\\(", right: "\\)", display: false}
+      ]
+    });
+  });
+  </script>
+
+  <!-- ==================================================================
+       ESTILOS PROPIOS DE ESTE LIBRO
+       La paleta es la misma que usan los interactivos, para que el
+       libro y los recursos se vean como una sola cosa.
+  =================================================================== -->
+  <style>
+    :root {
+      --azul:     #1a56db;   /* definiciones */
+      --verde:    #0b7a3b;   /* ejemplos */
+      --rojo:     #c0392b;   /* advertencias */
+      --naranja:  #e8710a;   /* notas y adornos */
+      --morado:   #8e44ad;   /* acentos */
+      --ambar:    #b8860b;
+    }
+
+    a { text-decoration: none; }
+
+    /* ---------- PORTADA ----------
+       El selector lleva ".page h2" delante a propósito: extra/style.css
+       pinta todos los h2 de las páginas de azul oscuro y, sin igualar esa
+       especificidad, el título de la portada saldría azul en vez de blanco. */
+    .page h2.titulo-portada {
+      position: absolute; top: 80px; left: 0; width: 100%;
+      margin: 0; padding: 0 24px; box-sizing: border-box;
+      text-align: center;
+      font-size: 56px; line-height: 1.15; font-weight: 700;
+      color: #ffffff;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.55);
+    }
+    .autor-portada {
+      position: absolute; bottom: 150px; left: 0; width: 100%;
+      text-align: center; font-size: 30px; color: #ffffff;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    }
+
+    /* ---------- TÍTULOS CON ADORNO ----------
+       Cada h2 lleva una barra de color degradada debajo; cada h3, una
+       pequeña marca de color a la izquierda. */
+    .page h2 {
+      padding-bottom: 5px;
+      border-bottom: 3px solid transparent;
+      border-image: linear-gradient(90deg, var(--azul), var(--morado), var(--naranja)) 1;
+    }
+    .page h3 {
+      padding-left: 10px;
+      border-left: 4px solid var(--naranja);
+      line-height: 1.25;
+    }
+
+    /* Adorno separador entre bloques */
+    .adorno {
+      text-align: center; letter-spacing: 10px; font-size: 0.8em;
+      color: var(--naranja); opacity: 0.7; margin: 10px 0 6px 0;
+    }
+
+    /* ---------- CAJAS DE COLOR ----------
+       Cuatro tipos, cada uno con su color, su etiqueta y su fondo suave.
+       Los fondos van en rgba para que también funcionen en modo oscuro. */
+    .caja {
+      border-left: 5px solid;
+      border-radius: 0 8px 8px 0;
+      padding: 7px 12px 7px 12px;
+      margin: 11px 0;
+      font-size: 0.95em;
+    }
+    .definicion { border-color: var(--azul);    background: rgba(26,86,219,0.08); }
+    .ejemplo    { border-color: var(--verde);   background: rgba(11,122,59,0.08); }
+    .cuidado    { border-color: var(--rojo);    background: rgba(192,57,43,0.08); }
+    .nota       { border-color: var(--naranja); background: rgba(232,113,10,0.09); }
+
+    .etiqueta {
+      display: inline-block; font-size: 0.68em; font-weight: bold;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: #fff; padding: 1px 9px; border-radius: 10px; margin-bottom: 5px;
+    }
+    .definicion .etiqueta { background: var(--azul); }
+    .ejemplo    .etiqueta { background: var(--verde); }
+    .cuidado    .etiqueta { background: var(--rojo); }
+    .nota       .etiqueta { background: var(--naranja); }
+
+    .caja p:last-child { margin-bottom: 0; }
+
+    /* ---------- TABLAS ---------- */
+    table.tabla {
+      width: 100%; border-collapse: collapse; margin: 11px 0;
+      font-size: 0.88em; border-radius: 6px; overflow: hidden;
+    }
+    table.tabla th {
+      background: var(--azul); color: #fff; font-weight: bold;
+      padding: 5px 8px; text-align: left;
+    }
+    table.tabla td { padding: 4px 8px; border-bottom: 1px solid rgba(128,128,128,0.3); }
+    table.tabla tr:nth-child(even) td { background: rgba(128,128,128,0.07); }
+
+    /* ---------- LISTAS Y EJERCICIOS ---------- */
+    ol.ejercicios > li { margin-bottom: 8px; }
+    ol.ejercicios { padding-left: 22px; }
+    ul.puntos { padding-left: 20px; }
+    ul.puntos li { margin-bottom: 4px; }
+
+    /* Término destacado dentro del texto */
+    .termino { color: var(--morado); font-weight: bold; }
+
+    /* ---------- CRÉDITOS DE RECURSOS ---------- */
+    .credito {
+      font-size: 0.66em; text-align: right; margin: 3px 0 0 0;
+      opacity: 0.75; line-height: 1.3;
+    }
+    .propio {
+      font-size: 0.68em; text-align: right; margin: 3px 0 0 0;
+      color: var(--verde); font-weight: bold;
+    }
+
+    /* ---------- TABLA DE CONTENIDO ---------- */
+    .caja_menu .toc_link { border-left: 3px solid var(--morado); padding-left: 9px; margin-bottom: 3px; }
+
+    /* ---------- ÚLTIMA PÁGINA ----------
+       La imagen va en una capa aparte con opacidad baja, para que el
+       texto se lea encima sin problema. */
+    .pagina-final { position: relative; overflow: hidden; }
+    .fondo-final {
+      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      background-image: url('imagenes/cositas/cositasenblanco.jpg');
+      background-size: cover; background-position: center;
+      opacity: 0.22;
+    }
+    .contenido-final {
+      position: relative; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+    }
+    .marco-final {
+      border: 2px solid var(--naranja); border-radius: 12px;
+      padding: 22px 26px; background: rgba(255,255,255,0.55);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="book_loader_container">
+    <div id="book_loader"></div>
+  </div>
+
+<div id="book_container">
+  <div id="btn_back_page"></div>
+  <div id="btn_next_page"></div>
+  <button id="go_to_table_of_content"></button>
+
+  <!-- menú de herramientas: modo oscuro, calculadora, editor y editor de fórmulas -->
+  <button id="btn_config"></button>
+  <div id="config_options">
+    <div id="dark_light_mode"></div>
+    <div style="display:block; text-align:center;">
+      <button id="tool_calculadora" onclick="openInteractive('./tools/calculadora78/index.html','380','648');"></button>
+    </div>
+    <div style="display:block; text-align:center;">
+      <button id="tool_editor" onclick="openInteractive('./editores/editorHTML5/index2.html','1000','600');"></button>
+    </div>
+    <div style="display:block; text-align:center;">
+      <button id="tool_katex" onclick="openInteractive('./interactivos/katex/index.html','1000','800');"></button>
+    </div>
+  </div>
+
+  <div id="table_of_content"></div>
+
+  <div id="pages_container">
+
+    <!-- página en blanco a la izquierda de la portada -->
+    <div class="page" style="background-color:transparent;" num=""></div>
+
+    <!-- PORTADA -->
+    <div class="page invertcolor" style="margin:0; padding:0;
+            background-image: url('imagenes/cositas/mathematics-1230074_1920.jpg');
+            background-position:center; background-repeat:no-repeat; background-size:cover;">
+      <h2 class="titulo-portada">Introducción<br>a las Funciones<br>de Variable Real</h2>
+      <div class="autor-portada">Juan Sebastián Romero Burgos</div>
+      <p style="position:absolute; bottom:60px; left:0; width:100%; text-align:center;
+                color:#ffffff; font-size:18px; letter-spacing:0.15em;
+                text-shadow:0 2px 8px rgba(0,0,0,0.55);">
+        BOGOTÁ &nbsp;·&nbsp; 2026
+      </p>
+    </div>
+
+    <!-- CONTRAPORTADA -->
+    <div class="page" num="">
+      <p>Título de la obra:<br>
+        <b>Introducción a las funciones de variable real</b></p>
+
+      <p>Autor:<br>Juan Sebastián Romero Burgos</p>
+
+      <p>Primera edición:<br>Bogotá, Colombia, 2026</p>
+
+      <p style="margin-top:1em;">
+        Diseño del libro: Juan Guillermo Rivera Berrío<br>
+        Código JavaScript del libro:
+        <a href="https://github.com/jlongi/libro_interactivo" target="_blank">Joel Espinosa Longi</a>,
+        <a href="https://www.matem.unam.mx/" target="_blank">IMATE</a>, UNAM<br>
+        Recursos interactivos: <a href="https://descartes.matem.unam.mx/" target="_blank">DescartesJS</a>, RED Descartes<br>
+        Fuentes: <a href="https://fonts.google.com/specimen/Lato" target="_blank">Lato</a> y
+        <a href="https://fonts.google.com/specimen/Ubuntu+Mono" target="_blank">Ubuntu Mono</a>
+      </p>
+
+      <div class="caja ejemplo" style="font-size:0.82em;">
+        <span class="etiqueta">Interactivos propios</span>
+        <p>Escritos en HTML, CSS y JavaScript por el autor de este libro:
+        dominio e imagen con diagrama sagital, unión e intersección de intervalos,
+        altitud de una etapa ciclista, dominio y rango sobre la gráfica,
+        lectura de dominio y rango, y monotonía con extremos relativos.</p>
+      </div>
+
+      <p style="font-size:0.78em; line-height:1.35;">
+        <b>Recursos de terceros</b>, utilizados con crédito a sus autores:<br>
+        · <a href="https://www.geogebra.org/m/TbYpSmjd" target="_blank">Llenado de recipientes: gráfica</a>, de Juan David Serrano Díaz, en GeoGebra<br>
+        · Escenas de jeroglíficos y de la Vuelta ciclista, de RED Descartes (DescartesJS), adaptadas
+      </p>
+
+      <p style="margin-top:0.6em;">LICENCIA</p>
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">
+        <img src="images/general/by-nc-sa.svg" style="height:1.75em; margin-right:0.75em;" alt="CC BY-NC-SA 4.0"></a>
+      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">Creative Commons Atribución-NoComercial-CompartirIgual 4.0</a>
+    </div>
+
+    <!-- PORTADA INTERIOR -->
+    <div class="page" style="text-align:center; font-size:120%;" init-page-num="true" num="">
+      <br><br>
+      <p><span style="font-size:180%;"><strong>Introducción a las funciones<br>de variable real</strong></span></p>
+      <p class="adorno">◆ ◆ ◆</p>
+      <br><br><br><br>
+
+      <p style="font-size:110%;">Juan Sebastián Romero Burgos</p>
+      <p style="font-size:0.85em; opacity:0.8;">Matemático</p>
+
+      <br><br><br><br><br><br>
+      <p>Bogotá, Colombia<br>2026</p>
+    </div>
+
+    <!-- TABLA DE CONTENIDO -->
+    <div class="page">
+      <div class="caja_menu">
+        <h2><b>Tabla de contenido</b></h2>
+        <br>
+        <div class="toc_link" href="#introduccion"></div>
+        <div class="toc_link" href="#conjuntos"></div>
+        <div class="toc_link" href="#funciones"></div>
+        <div class="toc_link" href="#funcionReal"></div>
+        <div class="toc_link" href="#continuidad"></div>
+        <div class="toc_link" href="#piensa"></div>
+        <div class="toc_link" href="#ejercicios"></div>
+      </div>
+    </div>
+
+    <!-- INTRODUCCIÓN -->
+    <div class="page">
+      <h1 id="introduccion" align="center">Introducción</h1>
+      <p class="adorno">◆ ◆ ◆</p>
+      <section style="width:100%;">
+        <p>Bienvenidos a este libro interactivo sobre las funciones de variable real, una guía diseñada para introducir uno de los conceptos más importantes de las matemáticas. Este recurso se apoya en los principios y herramientas de la Red Educativa Digital Descartes (RED Descartes), una asociación sin ánimo de lucro que, desde su constitución el 1 de junio de 2013, promueve la renovación metodológica en la enseñanza de las matemáticas mediante recursos digitales interactivos.</p>
+
+        <p>El enfoque es práctico y accesible. Cada apartado incluye actividades que permiten explorar los conceptos de manera intuitiva, desde su definición hasta sus aplicaciones. La intuición visual, sin embargo, no reemplaza a la definición: donde las dos se separan, el libro lo advierte en un recuadro rojo.</p>
+
+        <p>El recorrido empieza por el lenguaje de conjuntos, que es donde vive la definición de función; sigue con dominio, imagen y gráfica; y termina con monotonía y continuidad. Al final hay ejercicios propuestos con sus respuestas.</p>
+
+        <div class="caja nota">
+          <span class="etiqueta">Cómo usar el libro</span>
+          <p>Los recursos interactivos se abren en grande con el botón de la esquina superior derecha de cada uno. En el menú de configuración, arriba a la derecha, hay una calculadora, un editor de fórmulas y el modo oscuro.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- CONJUNTOS 1: idea y notación -->
+    <div class="page">
+      <h2 id="conjuntos" align="center">Conjuntos</h2>
+      <p>Un conjunto es una colección de elementos distintos, agrupados porque comparten una característica o simplemente porque decidimos reunirlos. Por ejemplo, \(\{1, 2, 3\}\) o \(\{\text{manzana}, \text{banana}, \text{naranja}\}\).</p>
+
+      <h3>Pertenencia</h3>
+      <p>Si \(a\) es un elemento del conjunto \(A\), escribimos \(a \in A\); si no lo es, \(a \notin A\). Con \(A = \{1,2,3\}\): \(2 \in A\) y \(7 \notin A\).</p>
+
+      <h3>Dos formas de escribir un conjunto</h3>
+      <p>Por <span class="termino">extensión</span>, listando sus elementos: \(P = \{2, 4, 6, 8\}\).</p>
+      <p>Por <span class="termino">comprensión</span>, dando la propiedad que los caracteriza:</p>
+      <p style="text-align:center;">\[ P = \{ n \in \mathbb{N} \;:\; n \text{ es par},\; 0 < n < 10 \}. \]</p>
+      <p>La segunda forma es la única posible cuando el conjunto es infinito, como \(\mathbb{Q} = \{ p/q : p, q \in \mathbb{Z},\, q \neq 0 \}\).</p>
+    </div>
+
+    <!-- CONJUNTOS 2: vacío, igualdad, subconjunto -->
+    <div class="page">
+      <h3>El conjunto vacío</h3>
+      <p>El conjunto sin elementos se denota \(\varnothing\) o \(\{\,\}\). No es lo mismo que \(\{\varnothing\}\): este último tiene un elemento, que resulta ser el conjunto vacío.</p>
+
+      <h3>Subconjunto</h3>
+      <p>Un conjunto \(B\) es <span class="termino">subconjunto</span> de \(A\), y se escribe \(B \subseteq A\), si todo elemento de \(B\) pertenece también a \(A\). Por ejemplo, si \(A = \{1, 2, 3\}\) y \(B = \{1, 2\}\), entonces \(B \subseteq A\).</p>
+      <p>Dos casos que conviene tener presentes: \(\varnothing \subseteq A\) y \(A \subseteq A\), cualquiera que sea \(A\).</p>
+
+      <h3>Igualdad</h3>
+      <p>Dos conjuntos son iguales cuando tienen exactamente los mismos elementos, sin importar el orden ni las repeticiones al escribirlos:</p>
+      <p style="text-align:center;">\[ A = B \iff A \subseteq B \;\text{ y }\; B \subseteq A. \]</p>
+      <p>Así, \(\{1,2,2,3\} = \{3,1,2\}\).</p>
+    </div>
+
+    <!-- CONJUNTOS 3: unión, intersección, diferencia -->
+    <div class="page">
+      <h3>Unión</h3>
+      <p>La <span class="termino">unión</span> de dos conjuntos reúne todos los elementos de ambos, sin repetirlos. Se denota \(A \cup B\). Si \(A = \{1, 2, 3\}\) y \(B = \{3, 4, 5\}\), entonces \(A \cup B = \{1, 2, 3, 4, 5\}\).</p>
+
+      <h3>Intersección</h3>
+      <p>La <span class="termino">intersección</span> \(A \cap B\) reúne únicamente los elementos que están en ambos conjuntos a la vez. Con los mismos conjuntos, \(A \cap B = \{3\}\).</p>
+      <p>Cuando \(A \cap B = \varnothing\) decimos que los conjuntos son <span class="termino">disjuntos</span>: no comparten ningún elemento.</p>
+
+      <h3>Diferencia</h3>
+      <p>La diferencia \(A \setminus B\) está formada por los elementos de \(A\) que no están en \(B\). En el ejemplo anterior, \(A \setminus B = \{1, 2\}\) y \(B \setminus A = \{4, 5\}\). El orden importa: la diferencia no es conmutativa.</p>
+    </div>
+
+    <!-- CONJUNTOS 4: complemento y leyes -->
+    <div class="page">
+      <h3>Complemento</h3>
+      <p>Si se trabaja dentro de un conjunto universal \(U\), el complemento de \(A\) es \(A^c = U \setminus A\): todo lo que está en \(U\) pero no en \(A\). Por ejemplo, si \(U = \mathbb{R}\) y \(A = [0, \infty)\), entonces \(A^c = (-\infty, 0)\).</p>
+
+      <h3>Propiedades útiles</h3>
+      <table class="tabla">
+        <tr><th>Propiedad</th><th>Enunciado</th></tr>
+        <tr><td>Conmutativa</td><td>\(A \cup B = B \cup A\), \(A \cap B = B \cap A\)</td></tr>
+        <tr><td>Asociativa</td><td>\((A \cup B) \cup C = A \cup (B \cup C)\)</td></tr>
+        <tr><td>Distributiva</td><td>\(A \cap (B \cup C) = (A \cap B) \cup (A \cap C)\)</td></tr>
+        <tr><td>De Morgan</td><td>\((A \cup B)^c = A^c \cap B^c\)</td></tr>
+        <tr><td>De Morgan</td><td>\((A \cap B)^c = A^c \cup B^c\)</td></tr>
+      </table>
+      <p>Las leyes de De Morgan son las que más se usan al calcular dominios: negar una unión de condiciones equivale a exigir que fallen todas a la vez.</p>
+    </div>
+
+    <!-- CONJUNTOS 5: intervalos -->
+    <div class="page">
+      <h3>Intervalos</h3>
+      <p>Un <span class="termino">intervalo</span> es un conjunto de números reales que contiene todos los números comprendidos entre dos extremos. Los extremos pueden incluirse o excluirse, y de ahí salen cuatro tipos, más los no acotados.</p>
+
+      <table class="tabla">
+        <tr><th>Notación</th><th>Definición</th><th>Nombre</th></tr>
+        <tr><td>\([a,b]\)</td><td>\(\{x : a \le x \le b\}\)</td><td>cerrado</td></tr>
+        <tr><td>\((a,b)\)</td><td>\(\{x : a &lt; x &lt; b\}\)</td><td>abierto</td></tr>
+        <tr><td>\([a,b)\)</td><td>\(\{x : a \le x &lt; b\}\)</td><td>semiabierto</td></tr>
+        <tr><td>\((a,b]\)</td><td>\(\{x : a &lt; x \le b\}\)</td><td>semiabierto</td></tr>
+        <tr><td>\([a,\infty)\)</td><td>\(\{x : x \ge a\}\)</td><td>no acotado</td></tr>
+        <tr><td>\((-\infty,b)\)</td><td>\(\{x : x &lt; b\}\)</td><td>no acotado</td></tr>
+      </table>
+
+      <div class="caja cuidado">
+        <span class="etiqueta">Cuidado</span>
+        <p>El símbolo \(\infty\) no es un número real, así que el extremo infinito siempre va abierto: se escribe \([a,\infty)\) y nunca \([a,\infty]\).</p>
+      </div>
+    </div>
+
+    <!-- CONJUNTOS 6: interactivo de intervalos -->
+    <div class="page">
+      <p>Explora cómo se combinan dos intervalos mediante la unión y la intersección. Fíjate en qué pasa con los extremos cuando uno es abierto y el otro cerrado, y en cuándo la unión deja de ser un solo intervalo.</p>
+
+      <!-- Recurso interactivo. La plantilla convierte este div en un iframe
+           escalado al ancho del texto y le agrega el botón de ampliar.
+           width/height fijan la proporción y el tamaño de la ventana grande. -->
+      <div class="interactive" width="700" height="580"
+           src="InteSebas/Intervalos/index.html"></div>
+      <p class="propio">Interactivo propio</p>
+    </div>
+
+    <!-- CONJUNTOS 7: producto cartesiano -->
+    <div class="page">
+      <h3>Producto cartesiano</h3>
+      <p>El <span class="termino">producto cartesiano</span> de \(A\) y \(B\) es el conjunto de todas las parejas ordenadas cuyo primer elemento está en \(A\) y cuyo segundo elemento está en \(B\):</p>
+      <p style="text-align:center;">\[ A \times B = \{ (a,b) \;:\; a \in A,\; b \in B \} \]</p>
+      <p>Por ejemplo, si \(A = \{1, 2\}\) y \(B = \{x, y\}\), entonces \(A \times B = \{(1,x), (1,y), (2,x), (2,y)\}\). El orden importa: \((1,x)\) y \((x,1)\) no son la misma pareja, y en general \(A \times B \neq B \times A\).</p>
+      <p>Si \(A\) tiene \(m\) elementos y \(B\) tiene \(n\), entonces \(A \times B\) tiene \(m \cdot n\) parejas.</p>
+
+      <div class="caja nota">
+        <span class="etiqueta">Por qué importa</span>
+        <p>Este conjunto es la base sobre la que se define el concepto de función. Cuando \(A = B = \mathbb{R}\), el producto \(\mathbb{R} \times \mathbb{R} = \mathbb{R}^2\) es el plano cartesiano donde dibujamos las gráficas.</p>
+      </div>
+    </div>
+
+    <!-- FUNCIONES 1: definición -->
+    <div class="page">
+      <h2 id="funciones">Funciones</h2>
+      <p>Una función asigna a cada elemento de un conjunto de partida exactamente un elemento de un conjunto de llegada. Las funciones son fundamentales en matemáticas y describen una gran cantidad de fenómenos.</p>
+
+      <div class="caja definicion">
+        <span class="etiqueta">Definición</span>
+        <p>Sean \(A\) y \(B\) conjuntos. Una función \(f\) de \(A\) en \(B\), escrita \(f: A \to B\), es una regla que asigna a <b>cada</b> elemento \(a \in A\) <b>un único</b> elemento \(f(a) \in B\).</p>
+      </div>
+
+      <p>La definición exige dos condiciones, y las dos importan:</p>
+      <ul class="puntos">
+        <li><b style="color:var(--azul)">Existencia:</b> ningún elemento de \(A\) se queda sin asignación.</li>
+        <li><b style="color:var(--azul)">Unicidad:</b> ningún elemento de \(A\) recibe dos asignaciones distintas.</li>
+      </ul>
+      <p>En términos del producto cartesiano, \(f\) es un subconjunto de \(A \times B\) tal que para cada \(a \in A\) existe exactamente una pareja \((a,b) \in f\).</p>
+    </div>
+
+    <!-- FUNCIONES 2: qué no es función -->
+    <div class="page">
+      <h3>Qué no es una función</h3>
+      <p>Las dos condiciones anteriores se entienden mejor viendo cómo fallan. Tomemos \(A = \{1,2,3\}\) y \(B = \{a,b\}\).</p>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Falla la existencia</span>
+        <p>La relación \(\{(1,a), (2,b)\}\) deja al 3 sin imagen. No es función <i>de \(A\) en \(B\)</i>, aunque sí lo sería de \(\{1,2\}\) en \(B\).</p>
+      </div>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Falla la unicidad</span>
+        <p>La relación \(\{(1,a), (1,b), (2,a), (3,b)\}\) asigna al 1 dos imágenes distintas. No es función bajo ninguna elección del conjunto de partida.</p>
+      </div>
+
+      <p>Un ejemplo con números reales: la relación \(x^2 + y^2 = 1\) no define a \(y\) como función de \(x\), porque para \(x = 0\) valen tanto \(y = 1\) como \(y = -1\). Sí lo hacen, por separado, \(y = \sqrt{1-x^2}\) y \(y = -\sqrt{1-x^2}\).</p>
+    </div>
+
+    <!-- FUNCIONES 3: jeroglíficos -->
+    <div class="page">
+      <p>El siguiente recurso ilustra la idea de asignación: cada signo de un conjunto se corresponde con un elemento del otro. La Piedra de Rosetta es un buen ejemplo histórico, porque estableció justamente esa correspondencia entre tres sistemas de escritura.</p>
+
+      <div class="interactive" width="700" height="720"
+           src="InteSebas/jeroglificos-JS/index.html"></div>
+      <p class="credito">Recurso interactivo de RED Descartes (DescartesJS), adaptado.</p>
+    </div>
+
+    <!-- FUNCIONES 4: dominio, codominio, imagen -->
+    <div class="page">
+      <h3>Dominio, codominio e imagen</h3>
+      <p>En una función \(f: A \to B\):</p>
+      <ul class="puntos">
+        <li>El <span class="termino">dominio</span> es \(A\), el conjunto de las entradas.</li>
+        <li>El <span class="termino">codominio</span> es \(B\), el conjunto donde viven las salidas.</li>
+        <li>La <span class="termino">imagen</span> (o recorrido) es el subconjunto de \(B\) formado por los valores que la función realmente alcanza: \(f(A) = \{ f(a) : a \in A \}\).</li>
+      </ul>
+      <p>La imagen puede ser más pequeña que el codominio. Siempre se cumple \(f(A) \subseteq B\), pero la igualdad no está garantizada.</p>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Ejemplo</span>
+        <p>Para \(f: \mathbb{R} \to \mathbb{R}\) con \(f(x) = x^2\): el dominio es \(\mathbb{R}\), el codominio es \(\mathbb{R}\) y la imagen es \([0,\infty)\), porque ningún cuadrado de un número real es negativo y todo número no negativo es el cuadrado de su raíz.</p>
+      </div>
+
+      <p style="font-size:0.93em;">En este libro usamos <i>imagen</i> y <i>rango</i> como sinónimos, pero conviene saber que algunos textos llaman rango al codominio.</p>
+    </div>
+
+    <!-- FUNCIONES 5: dominio natural -->
+    <div class="page">
+      <h3>Dominio natural</h3>
+      <p>Cuando una función se define con una fórmula y no se especifica el conjunto de partida, se toma como dominio el mayor conjunto donde la fórmula tiene sentido. Es el <span class="termino">dominio natural</span>.</p>
+
+      <p>En la práctica, tres reglas cubren casi todos los casos:</p>
+      <table class="tabla">
+        <tr><th>Si aparece…</th><th>Hay que exigir…</th></tr>
+        <tr><td>un denominador \(g(x)\)</td><td>\(g(x) \neq 0\)</td></tr>
+        <tr><td>una raíz par \(\sqrt[2n]{g(x)}\)</td><td>\(g(x) \ge 0\)</td></tr>
+        <tr><td>un logaritmo \(\ln g(x)\)</td><td>\(g(x) &gt; 0\)</td></tr>
+      </table>
+
+      <div class="caja nota">
+        <span class="etiqueta">Clave</span>
+        <p>Cuando aparecen varias condiciones a la vez, el dominio es la <b>intersección</b> de todas ellas: hay que cumplirlas todas simultáneamente.</p>
+      </div>
+    </div>
+
+    <!-- FUNCIONES 6: ejemplos de dominio -->
+    <div class="page">
+      <div class="caja ejemplo">
+        <span class="etiqueta">Ejemplo 1</span>
+        <p>\(f(x) = \dfrac{1}{x-2}\). Se exige \(x - 2 \neq 0\), es decir \(x \neq 2\). Dominio: \(\mathbb{R} \setminus \{2\} = (-\infty,2) \cup (2,\infty)\).</p>
+      </div>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Ejemplo 2</span>
+        <p>\(g(x) = \sqrt{x+3}\). Se exige \(x + 3 \ge 0\), o sea \(x \ge -3\). Dominio: \([-3, \infty)\).</p>
+      </div>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Ejemplo 3</span>
+        <p>\(h(x) = \dfrac{\sqrt{x+3}}{x-2}\). Ahora hay dos condiciones: \(x \ge -3\) y \(x \neq 2\). El dominio es la intersección:</p>
+        <p style="text-align:center;">\[ [-3,\infty) \cap (\mathbb{R}\setminus\{2\}) = [-3,2) \cup (2,\infty). \]</p>
+      </div>
+
+      <p>En el ejercicio de la página siguiente se genera al azar una correspondencia entre dos conjuntos finitos. Los elementos sin flecha no forman parte del dominio.</p>
+    </div>
+
+    <!-- FUNCIONES 7: interactivo propio de dominio e imagen -->
+    <div class="page">
+      <div class="interactive" width="700" height="540"
+           src="InteSebas/DominioRang/index.html"></div>
+      <p class="propio">Interactivo propio</p>
+    </div>
+
+    <!-- FUNCIONES DE VARIABLE REAL -->
+    <div class="page">
+      <h2 id="funcionReal">Funciones de variable real</h2>
+      <p>Una función de variable real es una función \(f: D \to \mathbb{R}\) con \(D \subseteq \mathbb{R}\): asigna a cada número real \(x\) del dominio exactamente un número real \(y = f(x)\).</p>
+      <p>El perfil de una etapa ciclista es un buen ejemplo: a cada kilómetro recorrido le corresponde una única altitud.</p>
+
+      <div class="interactive" width="900" height="550"
+           src="InteSebas/funcion-montana-cicla/index.html"></div>
+      <p class="propio">Interactivo propio, con datos de la 9.ª etapa de la Vuelta 2007</p>
+    </div>
+
+    <!-- TIPOS DE FUNCIONES -->
+    <div class="page">
+      <h3>Algunas funciones elementales</h3>
+      <table class="tabla">
+        <tr><th>Tipo</th><th>Fórmula</th><th>Dominio natural</th></tr>
+        <tr><td>Constante</td><td>\(f(x) = c\)</td><td>\(\mathbb{R}\)</td></tr>
+        <tr><td>Afín</td><td>\(f(x) = mx + b\)</td><td>\(\mathbb{R}\)</td></tr>
+        <tr><td>Cuadrática</td><td>\(f(x) = ax^2+bx+c\)</td><td>\(\mathbb{R}\)</td></tr>
+        <tr><td>Racional</td><td>\(f(x) = \dfrac{p(x)}{q(x)}\)</td><td>\(\{x : q(x) \neq 0\}\)</td></tr>
+        <tr><td>Raíz cuadrada</td><td>\(f(x) = \sqrt{x}\)</td><td>\([0,\infty)\)</td></tr>
+        <tr><td>Valor absoluto</td><td>\(f(x) = |x|\)</td><td>\(\mathbb{R}\)</td></tr>
+      </table>
+
+      <p>También son frecuentes las funciones <span class="termino">definidas a trozos</span>, que usan fórmulas distintas en distintas partes del dominio. El valor absoluto es un ejemplo:</p>
+      <p style="text-align:center;">\[ |x| = \begin{cases} x, & x \ge 0 \\ -x, & x &lt; 0 \end{cases} \]</p>
+    </div>
+
+    <!-- GRÁFICA -->
+    <div class="page">
+      <h3>Gráfica de una función</h3>
+      <p>La gráfica de \(f\) es el conjunto de puntos \((x, f(x))\) del plano, con \(x\) recorriendo el dominio. Es, literalmente, la función vista como subconjunto de \(\mathbb{R}^2\). En ella se leen las intersecciones con los ejes, los tramos de crecimiento y decrecimiento, las asíntotas y las discontinuidades.</p>
+
+      <div class="caja definicion">
+        <span class="etiqueta">Prueba de la recta vertical</span>
+        <p>Una curva del plano es la gráfica de una función de \(x\) si y solo si ninguna recta vertical la corta en más de un punto.</p>
+      </div>
+
+      <p>Es la traducción gráfica de la unicidad: dos cortes sobre la misma vertical significarían dos valores de \(y\) para un mismo \(x\). Por eso la circunferencia \(x^2+y^2=1\) no es la gráfica de una función, y la semicircunferencia superior sí lo es.</p>
+      <p>El dominio se lee proyectando la gráfica sobre el eje horizontal, y la imagen proyectándola sobre el vertical.</p>
+    </div>
+
+    <!-- INTERACTIVO: dominio y rango sobre la gráfica -->
+    <div class="page">
+      <p>Arrastra el punto a lo largo de la curva y observa cómo el dominio se marca sobre el eje horizontal y el rango sobre el vertical. Cambia de función con el selector: la última tiene los extremos abiertos.</p>
+
+      <div class="interactive" width="700" height="510"
+           src="InteSebas/DominioRangoGrafica/index.html"></div>
+      <p class="propio">Interactivo propio</p>
+    </div>
+
+    <!-- MONOTONÍA: teoría -->
+    <div class="page">
+      <h3>Monotonía</h3>
+      <p>Sea \(I\) un intervalo contenido en el dominio de \(f\).</p>
+
+      <div class="caja definicion">
+        <span class="etiqueta">Definición</span>
+        <p>\(f\) es <b>creciente</b> en \(I\) si para todos \(x_1, x_2 \in I\) con \(x_1 &lt; x_2\) se cumple \(f(x_1) \le f(x_2)\); y <b>estrictamente creciente</b> si vale \(f(x_1) &lt; f(x_2)\). Las definiciones de decreciente son las mismas con las desigualdades al revés.</p>
+      </div>
+
+      <p>Un punto \(c\) es un <span class="termino">máximo relativo</span> si \(f(c) \ge f(x)\) para todo \(x\) cercano a \(c\); es <span class="termino">mínimo relativo</span> si vale la desigualdad contraria.</p>
+
+      <div class="caja nota">
+        <span class="etiqueta">Dónde buscarlos</span>
+        <p>Los extremos relativos aparecen donde la función pasa de crecer a decrecer, o al revés. Si entre los dos tramos hay una parte constante, el extremo no es un punto sino todo ese tramo.</p>
+      </div>
+    </div>
+
+    <!-- MONOTONÍA: interactivo -->
+    <div class="page">
+      <p>Identifica los intervalos donde la función crece, decrece o es constante, y los extremos relativos. Al ver la solución la curva se colorea por tramos.</p>
+
+      <div class="interactive" width="700" height="560"
+           src="InteSebas/Monotonia/index.html"></div>
+      <p class="propio">Interactivo propio</p>
+    </div>
+
+    <!-- CONTINUIDAD: definición -->
+    <div class="page">
+      <h3 id="continuidad">Función continua</h3>
+      <p>La imagen habitual es que una función es continua si su gráfica puede dibujarse sin levantar el lápiz del papel. La idea de fondo es correcta: cambios pequeños en \(x\) producen cambios pequeños en \(y\). Pero la definición precisa es esta:</p>
+
+      <div class="caja definicion">
+        <span class="etiqueta">Definición</span>
+        <p>\(f\) es continua en un punto \(a\) de su dominio si</p>
+        <p style="text-align:center;">\[ \lim_{x \to a} f(x) = f(a). \]</p>
+        <p>Y \(f\) es continua si lo es en todos los puntos de su dominio.</p>
+      </div>
+
+      <p>La igualdad encierra tres exigencias: que \(f(a)\) esté definido, que el límite exista, y que ambos coincidan.</p>
+
+      <div class="caja cuidado">
+        <span class="etiqueta">Cuidado con el lápiz</span>
+        <p>La imagen del trazo sin levantar el lápiz solo funciona cuando el dominio es un intervalo. La función \(f(x) = 1/x\) es continua en todo su dominio \(\mathbb{R}\setminus\{0\}\) y, sin embargo, su gráfica tiene dos ramas separadas.</p>
+      </div>
+    </div>
+
+    <!-- DISCONTINUIDADES -->
+    <div class="page">
+      <h3>Funciones discontinuas</h3>
+      <p>Una función es discontinua en un punto \(a\) de su dominio cuando falla la igualdad anterior. Según cómo falle, se distinguen tres casos.</p>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Evitable</span>
+        <p>El límite existe pero no coincide con \(f(a)\). Por ejemplo \(f(x)=x^2\) si \(x \neq 1\) y \(f(1)=3\): el límite en 1 es 1, no 3. Se arregla redefiniendo un solo punto, y de ahí el nombre.</p>
+      </div>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">De salto</span>
+        <p>Los límites laterales existen pero son distintos. Por ejemplo, la función que vale \(-1\) para \(x&lt;0\) y \(1\) para \(x\ge 0\) salta en el origen.</p>
+      </div>
+
+      <div class="caja ejemplo">
+        <span class="etiqueta">Esencial</span>
+        <p>Algún límite lateral no existe o es infinito. Por ejemplo \(f(x)=\operatorname{sen}(1/x)\) para \(x\neq 0\) y \(f(0)=0\): cerca del origen la función oscila sin acercarse a ningún valor.</p>
+      </div>
+    </div>
+
+    <!-- INTERACTIVO: leer dominio y rango de una gráfica -->
+    <div class="page">
+      <p>Ahora al revés: dada la gráfica, escribe su dominio y su rango. Fíjate en si los extremos de cada trozo están marcados con punto lleno o hueco, porque eso decide si el valor pertenece o no al conjunto.</p>
+
+      <div class="interactive" width="700" height="520"
+           src="InteSebas/DominioRangoEjercicio/index.html"></div>
+      <p class="propio">Interactivo propio</p>
+    </div>
+
+    <!-- ¡PIENSA EN ELLO! -->
+    <div class="page">
+      <h3 id="piensa">¡Piensa en ello!</h3>
+      <p>Las siguientes gráficas describen el proceso de llenado de distintos recipientes: la altura del líquido en función del volumen vertido.</p>
+
+      <div class="interactive" width="900" height="600"
+           src="https://www.geogebra.org/material/iframe/id/TbYpSmjd"></div>
+      <p class="credito"><a href="https://www.geogebra.org/m/TbYpSmjd" target="_blank">Llenado de recipientes: gráfica</a>, de Juan David Serrano Díaz, en GeoGebra.</p>
+    </div>
+
+    <!-- PREGUNTAS -->
+    <div class="page">
+      <h3>Preguntas para discutir</h3>
+      <ul class="puntos">
+        <li>Describe cada una de las gráficas.</li>
+        <li>¿Qué tienen en común?</li>
+        <li>¿En qué se diferencian?</li>
+        <li>¿A qué se deben esas semejanzas y diferencias?</li>
+        <li>¿Todas las gráficas corresponden a funciones continuas? Justifica tu respuesta con la definición, no con el dibujo.</li>
+        <li>¿Cuál es el dominio y cuál la imagen en cada caso?</li>
+        <li>¿Por qué el recipiente cónico da una gráfica curva y el cilíndrico una recta? ¿Qué le pasaría a la gráfica si el recipiente fuera más ancho arriba que abajo?</li>
+      </ul>
+    </div>
+
+    <!-- EJERCICIOS -->
+    <div class="page">
+      <h3 id="ejercicios">Ejercicios propuestos</h3>
+      <ol class="ejercicios">
+        <li>Con \(A=\{1,2,3,4\}\) y \(B=\{3,4,5\}\), calcula \(A\cup B\), \(A\cap B\), \(A\setminus B\) y \(B\setminus A\).</li>
+        <li>Escribe por comprensión el conjunto \(\{1,4,9,16,25\}\).</li>
+        <li>Expresa como intervalo o unión de intervalos: \(\{x\in\mathbb{R} : |x| &lt; 3\}\).</li>
+        <li>Si \(A=\{1,2\}\) y \(B=\{a,b,c\}\), ¿cuántos elementos tiene \(A\times B\)? Escríbelos.</li>
+        <li>Determina el dominio natural de:
+          (a) \(f(x)=\dfrac{x+1}{x^2-9}\),
+          (b) \(g(x)=\sqrt{5-x}\),
+          (c) \(h(x)=\dfrac{1}{\sqrt{x-1}}\).</li>
+        <li>Halla la imagen de \(f(x)=x^2+1\) con dominio \(\mathbb{R}\).</li>
+        <li>¿La relación \(y^2 = x\) define a \(y\) como función de \(x\)? Justifica con la prueba de la recta vertical.</li>
+        <li>Clasifica la discontinuidad en \(x=0\) de la función que vale \(x+1\) para \(x&lt;0\) y \(x-1\) para \(x\ge 0\).</li>
+      </ol>
+    </div>
+
+    <!-- RESPUESTAS -->
+    <div class="page">
+      <h3>Respuestas</h3>
+      <ol class="ejercicios">
+        <li>\(A\cup B=\{1,2,3,4,5\}\); \(A\cap B=\{3,4\}\); \(A\setminus B=\{1,2\}\); \(B\setminus A=\{5\}\).</li>
+        <li>\(\{n^2 : n\in\mathbb{N},\; 1\le n\le 5\}\).</li>
+        <li>\((-3,3)\).</li>
+        <li>Seis: \((1,a),(1,b),(1,c),(2,a),(2,b),(2,c)\).</li>
+        <li>(a) \(\mathbb{R}\setminus\{-3,3\}\); (b) \((-\infty,5]\); (c) \((1,\infty)\), porque además de \(x-1\ge 0\) el denominador obliga a \(x-1\neq 0\).</li>
+        <li>\([1,\infty)\).</li>
+        <li>No. Para \(x=4\) hay dos valores, \(y=2\) y \(y=-2\), así que la recta vertical \(x=4\) corta la curva dos veces.</li>
+        <li>De salto: el límite por la izquierda es 1 y por la derecha es \(-1\).</li>
+      </ol>
+    </div>
+
+    <!-- REFERENCIAS -->
+    <div class="page">
+      <h3>Referencias</h3>
+      <bibitem>
+        Espinosa Longi, J. <i>Plantilla libro interactivo</i>. IMATE, UNAM. <a href="https://github.com/jlongi/libro_interactivo" target="_blank">https://github.com/jlongi/libro_interactivo</a>
+      </bibitem>
+      <bibitem>
+        GeoGebra. (2024). <i>Materiales de matemáticas interactivas</i>. <a href="https://www.geogebra.org" target="_blank">https://www.geogebra.org</a>
+      </bibitem>
+      <bibitem>
+        Proyecto Descartes. (2024). <i>Recursos y código de matemáticas interactivas</i>. <a href="https://proyectodescartes.org" target="_blank">https://proyectodescartes.org</a>
+      </bibitem>
+      <bibitem>
+        Sáenz, J. (2001). <i>Fundamentos de la matemática</i> (2.ª ed.). Hipotenusa.
+      </bibitem>
+      <bibitem>
+        Spivak, M. (2008). <i>Calculus</i> (4.ª ed.). Publish or Perish.
+      </bibitem>
+    </div>
+
+    <!-- CIERRE: reseña del autor, sobre la imagen de fondo suave -->
+    <div class="page pagina-final" num="">
+      <div class="fondo-final"></div>
+      <div class="contenido-final">
+        <div class="marco-final">
+          <p class="adorno" style="margin-top:0;">◆ ◆ ◆</p>
+
+          <h3 style="border:none; padding:0; margin:0 0 10px 0; text-align:center;">Sobre el autor</h3>
+
+          <p style="text-align:left; font-size:0.92em; line-height:1.5; margin:0;">
+            <b>Juan Sebastián Romero Burgos</b> es matemático, egresado del programa de
+            Matemáticas de la Fundación Universitaria Konrad Lorenz, en Bogotá, Colombia.
+          </p>
+
+          <p style="text-align:left; font-size:0.92em; line-height:1.5; margin:9px 0 0 0;">
+            Le apasionan el análisis matemático, la topología algebraica, las ecuaciones
+            diferenciales ordinarias (EDO), la programación y el área actuarial. Este libro
+            reúne varias de esas facetas: escribió el contenido como matemático y programó varios recursos interactivos que lo acompañan.
+          </p>
+
+          <p style="margin:16px 0 0 0; font-size:0.82em;">
+            <i>Introducción a las funciones de variable real</i> · Bogotá, 2026<br>
+            Obra publicada bajo licencia
+            <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">Creative Commons BY-NC-SA 4.0</a>
+          </p>
+          <p style="margin:6px 0 0 0;"><a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">
+            <img src="images/general/by-nc-sa.svg" style="height:1.6em;" alt="CC BY-NC-SA 4.0"></a></p>
+
+          <p class="adorno" style="margin-bottom:0;">◆ ◆ ◆</p>
+        </div>
+      </div>
+    </div>
+
+  <!-- [cierra] pages_container -->
+  </div>
+<!-- [cierra] book_container -->
+</div>
+</body>
+</html>

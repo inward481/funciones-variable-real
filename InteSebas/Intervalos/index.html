@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Intervalos: unión e intersección</title>
+
+<style>
+/* ------------------------------------------------------------------
+   COLORES. Cambiando estas cinco variables cambia todo el interactivo.
+------------------------------------------------------------------ */
+:root {
+  --color-a:     #1a56db;   /* intervalo A */
+  --color-b:     #0b7a3b;   /* intervalo B */
+  --color-union: #c0392b;   /* A unión B */
+  --color-inter: #b8860b;   /* A intersección B */
+  --gris-suave:  #e8e8ec;
+  --texto:       #222;
+}
+
+body {
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 13px;
+  color: var(--texto);
+  margin: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+h1 { font-size: 15px; text-align: center; margin: 0 0 6px 0; color: #000099; }
+
+/* --- Los dos paneles, uno al lado del otro --- */
+.paneles { display: flex; gap: 8px; }
+
+.panel {
+  flex: 1;
+  border: 2px solid var(--gris-suave);
+  border-radius: 6px;
+  padding: 5px 7px 7px 7px;
+}
+.panel.a { border-color: var(--color-a); }
+.panel.b { border-color: var(--color-b); }
+
+.panel h2 { font-size: 13px; margin: 0 0 4px 0; }
+.panel.a h2 { color: var(--color-a); }
+.panel.b h2 { color: var(--color-b); }
+
+.fila { display: flex; align-items: center; gap: 5px; margin-bottom: 4px; }
+.fila .nombre { font-style: italic; font-weight: bold; width: 12px; }
+
+.fila input[type="text"] {
+  width: 52px; padding: 3px 4px; font-size: 13px; text-align: center;
+  border: 1px solid #bbb; border-radius: 3px;
+}
+.fila input[type="text"]:disabled { background: #f0f0f0; color: #aaa; }
+
+/* --- Botones de tipo de extremo: abierto, cerrado o infinito --- */
+.segmentado { display: flex; }
+.segmentado input { position: absolute; opacity: 0; pointer-events: none; }
+.segmentado label {
+  padding: 3px 6px; font-size: 11px; cursor: pointer;
+  border: 1px solid #bbb; border-left: none; background: #fafafa;
+  user-select: none;
+}
+.segmentado label:first-of-type { border-left: 1px solid #bbb; border-radius: 3px 0 0 3px; }
+.segmentado label:last-of-type { border-radius: 0 3px 3px 0; }
+.panel.a .segmentado input:checked + label { background: var(--color-a); color: #fff; border-color: var(--color-a); }
+.panel.b .segmentado input:checked + label { background: var(--color-b); color: #fff; border-color: var(--color-b); }
+
+/* --- Lectura del intervalo en notación matemática --- */
+.notacion { font-size: 13px; margin-top: 4px; line-height: 1.5; }
+.notacion .valor { font-weight: bold; }
+.panel.a .notacion .valor { color: var(--color-a); }
+.panel.b .notacion .valor { color: var(--color-b); }
+.aviso { color: var(--color-union); font-size: 11px; }
+
+/* --- Casillas para mostrar unión e intersección --- */
+.opciones { display: flex; justify-content: center; gap: 16px; margin: 7px 0 2px 0; }
+.opciones label { cursor: pointer; padding: 3px 9px; border-radius: 3px; font-weight: bold; }
+.opciones .op-union { background: var(--color-union); color: #fff; }
+.opciones .op-inter { background: var(--color-inter); color: #fff; }
+.opciones input { vertical-align: middle; margin-right: 4px; }
+
+/* --- Resultados en texto --- */
+.resultados { text-align: center; font-size: 13px; min-height: 1.2em; line-height: 1.6; }
+.resultados .r-union { color: var(--color-union); font-weight: bold; }
+.resultados .r-inter { color: var(--color-inter); font-weight: bold; }
+
+svg { width: 100%; height: auto; display: block; margin-top: 2px; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }
+</style>
+</head>
+
+<body>
+<div id="envoltorio">
+
+
+<h1>Intervalos en la recta real: unión e intersección</h1>
+
+<div class="paneles">
+
+  <!-- ---------------- INTERVALO A ---------------- -->
+  <div class="panel a">
+    <h2>Intervalo A</h2>
+
+    <div class="fila">
+      <span class="nombre">a</span>
+      <input type="text" id="a-min-valor" value="-1/3" autocomplete="off">
+      <span class="segmentado">
+        <input type="radio" name="a-min" id="a-min-c" value="cerrado" checked><label for="a-min-c">Cerrado</label>
+        <input type="radio" name="a-min" id="a-min-o" value="abierto"><label for="a-min-o">Abierto</label>
+        <input type="radio" name="a-min" id="a-min-i" value="infinito"><label for="a-min-i">−∞</label>
+      </span>
+    </div>
+
+    <div class="fila">
+      <span class="nombre">b</span>
+      <input type="text" id="a-max-valor" value="5/2" autocomplete="off">
+      <span class="segmentado">
+        <input type="radio" name="a-max" id="a-max-c" value="cerrado"><label for="a-max-c">Cerrado</label>
+        <input type="radio" name="a-max" id="a-max-o" value="abierto"><label for="a-max-o">Abierto</label>
+        <input type="radio" name="a-max" id="a-max-i" value="infinito" checked><label for="a-max-i">+∞</label>
+      </span>
+    </div>
+
+    <div class="notacion" id="a-notacion"></div>
+  </div>
+
+  <!-- ---------------- INTERVALO B ---------------- -->
+  <div class="panel b">
+    <h2>Intervalo B</h2>
+
+    <div class="fila">
+      <span class="nombre">c</span>
+      <input type="text" id="b-min-valor" value="-2" autocomplete="off">
+      <span class="segmentado">
+        <input type="radio" name="b-min" id="b-min-c" value="cerrado"><label for="b-min-c">Cerrado</label>
+        <input type="radio" name="b-min" id="b-min-o" value="abierto" checked><label for="b-min-o">Abierto</label>
+        <input type="radio" name="b-min" id="b-min-i" value="infinito"><label for="b-min-i">−∞</label>
+      </span>
+    </div>
+
+    <div class="fila">
+      <span class="nombre">d</span>
+      <input type="text" id="b-max-valor" value="7/2" autocomplete="off">
+      <span class="segmentado">
+        <input type="radio" name="b-max" id="b-max-c" value="cerrado" checked><label for="b-max-c">Cerrado</label>
+        <input type="radio" name="b-max" id="b-max-o" value="abierto"><label for="b-max-o">Abierto</label>
+        <input type="radio" name="b-max" id="b-max-i" value="infinito"><label for="b-max-i">+∞</label>
+      </span>
+    </div>
+
+    <div class="notacion" id="b-notacion"></div>
+  </div>
+
+</div>
+
+<div class="opciones">
+  <label class="op-union"><input type="checkbox" id="ver-union" checked>A ∪ B</label>
+  <label class="op-inter"><input type="checkbox" id="ver-inter" checked>A ∩ B</label>
+</div>
+
+<div class="resultados" id="resultados"></div>
+
+<!-- El script dibuja aquí la recta real -->
+<div id="recta"></div>
+
+</div>
+<script>
+/* ==================================================================
+   1. LECTURA DE LOS DATOS
+   Un intervalo se guarda así:
+     { min, minCerrado, minTexto, max, maxCerrado, maxTexto, vacio }
+   Los extremos infinitos se guardan como -Infinity o Infinity.
+================================================================== */
+
+/* Acepta enteros, decimales y fracciones: "-1/3", "2.5", "-2".
+   Devuelve null si el texto no es un número válido. */
+function parseValor(texto) {
+  texto = texto.trim().replace(",", ".");
+  if (texto === "") return null;
+
+  const fraccion = texto.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if (fraccion) {
+    const numerador = parseFloat(fraccion[1]);
+    const denominador = parseFloat(fraccion[2]);
+    if (denominador === 0) return null;
+    return { valor: numerador / denominador, texto: texto };
+  }
+
+  const numero = parseFloat(texto);
+  if (isNaN(numero)) return null;
+  return { valor: numero, texto: texto };
+}
+
+/* Lee de la página el intervalo cuyos campos empiezan por el prefijo
+   dado ("a" o "b") y devuelve el objeto intervalo. */
+function leerIntervalo(prefijo) {
+  const tipoMin = document.querySelector('input[name="' + prefijo + '-min"]:checked').value;
+  const tipoMax = document.querySelector('input[name="' + prefijo + '-max"]:checked').value;
+  const campoMin = document.getElementById(prefijo + "-min-valor");
+  const campoMax = document.getElementById(prefijo + "-max-valor");
+
+  // Los campos de valor se desactivan cuando el extremo es infinito
+  campoMin.disabled = (tipoMin === "infinito");
+  campoMax.disabled = (tipoMax === "infinito");
+
+  const intervalo = { error: false, vacio: false };
+
+  if (tipoMin === "infinito") {
+    intervalo.min = -Infinity;
+    intervalo.minCerrado = false;
+    intervalo.minTexto = "−∞";
+  } else {
+    const leido = parseValor(campoMin.value);
+    if (leido === null) { intervalo.error = true; return intervalo; }
+    intervalo.min = leido.valor;
+    intervalo.minCerrado = (tipoMin === "cerrado");
+    intervalo.minTexto = leido.texto;
+  }
+
+  if (tipoMax === "infinito") {
+    intervalo.max = Infinity;
+    intervalo.maxCerrado = false;
+    intervalo.maxTexto = "+∞";
+  } else {
+    const leido = parseValor(campoMax.value);
+    if (leido === null) { intervalo.error = true; return intervalo; }
+    intervalo.max = leido.valor;
+    intervalo.maxCerrado = (tipoMax === "cerrado");
+    intervalo.maxTexto = leido.texto;
+  }
+
+  // Un intervalo con el extremo izquierdo por encima del derecho es vacío,
+  // igual que [a,a) o (a,a]. Solo [a,a] = {a} tiene un elemento.
+  if (intervalo.min > intervalo.max) intervalo.vacio = true;
+  if (intervalo.min === intervalo.max && !(intervalo.minCerrado && intervalo.maxCerrado)) {
+    intervalo.vacio = true;
+  }
+
+  return intervalo;
+}
+
+/* ==================================================================
+   2. OPERACIONES ENTRE INTERVALOS
+================================================================== */
+
+function contiene(intervalo, x) {
+  if (intervalo.vacio) return false;
+  const porIzquierda = intervalo.minCerrado ? (x >= intervalo.min) : (x > intervalo.min);
+  const porDerecha   = intervalo.maxCerrado ? (x <= intervalo.max) : (x < intervalo.max);
+  return porIzquierda && porDerecha;
+}
+
+/* La intersección de dos intervalos es siempre un intervalo (o el vacío):
+   se toma el mayor de los extremos izquierdos y el menor de los derechos. */
+function interseccion(A, B) {
+  if (A.vacio || B.vacio) return { vacio: true };
+
+  const resultado = { vacio: false };
+
+  if (A.min > B.min)      { resultado.min = A.min; resultado.minCerrado = A.minCerrado; resultado.minTexto = A.minTexto; }
+  else if (A.min < B.min) { resultado.min = B.min; resultado.minCerrado = B.minCerrado; resultado.minTexto = B.minTexto; }
+  else { // extremos iguales: solo queda cerrado si lo está en los dos
+    resultado.min = A.min;
+    resultado.minCerrado = A.minCerrado && B.minCerrado;
+    resultado.minTexto = A.minTexto;
+  }
+
+  if (A.max < B.max)      { resultado.max = A.max; resultado.maxCerrado = A.maxCerrado; resultado.maxTexto = A.maxTexto; }
+  else if (A.max > B.max) { resultado.max = B.max; resultado.maxCerrado = B.maxCerrado; resultado.maxTexto = B.maxTexto; }
+  else {
+    resultado.max = A.max;
+    resultado.maxCerrado = A.maxCerrado && B.maxCerrado;
+    resultado.maxTexto = A.maxTexto;
+  }
+
+  if (resultado.min > resultado.max) resultado.vacio = true;
+  if (resultado.min === resultado.max && !(resultado.minCerrado && resultado.maxCerrado)) {
+    resultado.vacio = true;
+  }
+
+  return resultado;
+}
+
+/* La unión puede no ser un intervalo: si los dos están separados,
+   quedan dos trozos. Por eso se devuelve una lista. */
+function union(A, B) {
+  if (A.vacio && B.vacio) return [{ vacio: true }];
+  if (A.vacio) return [B];
+  if (B.vacio) return [A];
+
+  const corteIzq = Math.max(A.min, B.min);
+  const corteDer = Math.min(A.max, B.max);
+
+  // ¿Se tocan o se solapan? Si el punto de encuentro pertenece al menos
+  // a uno de los dos, no hay hueco y la unión es un solo intervalo.
+  let pegados;
+  if (corteIzq < corteDer) pegados = true;
+  else if (corteIzq > corteDer) pegados = false;
+  else pegados = contiene(A, corteIzq) || contiene(B, corteIzq);
+
+  if (!pegados) {
+    // Dos trozos, ordenados de izquierda a derecha
+    return (A.min < B.min) ? [A, B] : [B, A];
+  }
+
+  const resultado = { vacio: false };
+
+  if (A.min < B.min)      { resultado.min = A.min; resultado.minCerrado = A.minCerrado; resultado.minTexto = A.minTexto; }
+  else if (A.min > B.min) { resultado.min = B.min; resultado.minCerrado = B.minCerrado; resultado.minTexto = B.minTexto; }
+  else { // extremos iguales: basta con que esté cerrado en uno
+    resultado.min = A.min;
+    resultado.minCerrado = A.minCerrado || B.minCerrado;
+    resultado.minTexto = A.minTexto;
+  }
+
+  if (A.max > B.max)      { resultado.max = A.max; resultado.maxCerrado = A.maxCerrado; resultado.maxTexto = A.maxTexto; }
+  else if (A.max < B.max) { resultado.max = B.max; resultado.maxCerrado = B.maxCerrado; resultado.maxTexto = B.maxTexto; }
+  else {
+    resultado.max = A.max;
+    resultado.maxCerrado = A.maxCerrado || B.maxCerrado;
+    resultado.maxTexto = A.maxTexto;
+  }
+
+  return [resultado];
+}
+
+/* ==================================================================
+   3. ESCRITURA EN NOTACIÓN MATEMÁTICA
+================================================================== */
+
+function textoIntervalo(I) {
+  if (I.vacio) return "∅";
+  // Un intervalo cerrado cuyos extremos coinciden tiene un solo elemento:
+  // se lee mejor como {a} que como [a, a].
+  if (I.min === I.max && I.minCerrado && I.maxCerrado) return "{" + I.minTexto + "}";
+  const izq = (I.min === -Infinity || !I.minCerrado) ? "(" : "[";
+  const der = (I.max === Infinity || !I.maxCerrado) ? ")" : "]";
+  return izq + I.minTexto + ", " + I.maxTexto + der;
+}
+
+function textoLista(lista) {
+  return lista.map(textoIntervalo).join(" ∪ ");
+}
+
+/* Escritura por comprensión: { x ∈ ℝ : condiciones } */
+function textoConjunto(I) {
+  if (I.vacio) return "∅";
+
+  const condiciones = [];
+  if (I.min !== -Infinity) {
+    condiciones.push(I.minTexto + (I.minCerrado ? " ≤ " : " < ") + "x");
+  }
+  if (I.max !== Infinity) {
+    condiciones.push("x" + (I.maxCerrado ? " ≤ " : " < ") + I.maxTexto);
+  }
+  if (condiciones.length === 0) return "ℝ";
+  return "{ x ∈ ℝ : " + condiciones.join(" y ") + " }";
+}
+
+/* ==================================================================
+   4. DIBUJO DE LA RECTA REAL
+================================================================== */
+
+const ANCHO = 560;
+const MARGEN = { izq: 16, der: 16 };
+const ANCHO_UTIL = ANCHO - MARGEN.izq - MARGEN.der;
+const ALTO_FILA = 26;
+
+/* Los mismos colores que las variables CSS de arriba. Se repiten aquí
+   porque los atributos de un SVG generado no leen var(--...) de forma
+   fiable en todos los navegadores. Si cambias uno, cambia los dos. */
+const COLOR = {
+  a: "#1a56db",
+  b: "#0b7a3b",
+  union: "#c0392b",
+  inter: "#b8860b"
+};
+
+let rangoMin = -5, rangoMax = 5;   // tramo visible de la recta
+
+/* Ajusta el tramo visible para que se vean todos los extremos finitos */
+function calcularRango(A, B) {
+  const finitos = [];
+  [A, B].forEach(I => {
+    if (!I.vacio) {
+      if (I.min !== -Infinity) finitos.push(I.min);
+      if (I.max !== Infinity) finitos.push(I.max);
+    }
+  });
+
+  if (finitos.length === 0) { rangoMin = -5; rangoMax = 5; return; }
+
+  let menor = Math.min.apply(null, finitos);
+  let mayor = Math.max.apply(null, finitos);
+  let holgura = (mayor - menor) * 0.3 + 1;
+
+  rangoMin = Math.floor(menor - holgura);
+  rangoMax = Math.ceil(mayor + holgura);
+}
+
+function coordX(valor) {
+  if (valor === -Infinity) return MARGEN.izq;
+  if (valor === Infinity) return MARGEN.izq + ANCHO_UTIL;
+  const proporcion = (valor - rangoMin) / (rangoMax - rangoMin);
+  return MARGEN.izq + proporcion * ANCHO_UTIL;
+}
+
+/* Elige un paso de marcas que dé entre 8 y 16 divisiones */
+function pasoMarcas() {
+  const rango = rangoMax - rangoMin;
+  const posibles = [0.5, 1, 2, 5, 10, 20, 50, 100];
+  for (const paso of posibles) {
+    if (rango / paso <= 16) return paso;
+  }
+  return 100;
+}
+
+/* Dibuja una fila: la barra del intervalo con sus extremos */
+function dibujarFila(I, y, color, etiqueta) {
+  let svg = '<text x="2" y="' + (y + 4) + '" font-size="12" font-weight="bold" fill="' +
+            color + '">' + etiqueta + '</text>';
+
+  if (I.vacio) {
+    svg += '<text x="' + (MARGEN.izq + 26) + '" y="' + (y + 4) +
+           '" font-size="12" fill="' + color + '">∅ (vacío)</text>';
+    return svg;
+  }
+
+  const x1 = coordX(I.min);
+  const x2 = coordX(I.max);
+
+  svg += '<line x1="' + x1 + '" y1="' + y + '" x2="' + x2 + '" y2="' + y +
+         '" stroke="' + color + '" stroke-width="4" stroke-linecap="butt"/>';
+
+  // Extremo izquierdo: flecha si es infinito, círculo lleno o hueco si no
+  if (I.min === -Infinity) {
+    svg += '<path d="M ' + (x1 + 9) + ' ' + (y - 5) + ' L ' + x1 + ' ' + y +
+           ' L ' + (x1 + 9) + ' ' + (y + 5) + ' Z" fill="' + color + '"/>';
+  } else {
+    svg += '<circle cx="' + x1 + '" cy="' + y + '" r="4.5" stroke="' + color +
+           '" stroke-width="2" fill="' + (I.minCerrado ? color : "#fff") + '"/>';
+  }
+
+  if (I.max === Infinity) {
+    svg += '<path d="M ' + (x2 - 9) + ' ' + (y - 5) + ' L ' + x2 + ' ' + y +
+           ' L ' + (x2 - 9) + ' ' + (y + 5) + ' Z" fill="' + color + '"/>';
+  } else {
+    svg += '<circle cx="' + x2 + '" cy="' + y + '" r="4.5" stroke="' + color +
+           '" stroke-width="2" fill="' + (I.maxCerrado ? color : "#fff") + '"/>';
+  }
+
+  return svg;
+}
+
+function dibujar(A, B, listaUnion, laInterseccion, verUnion, verInter) {
+  const filas = 2 + (verUnion ? listaUnion.length : 0) + (verInter ? 1 : 0);
+  const alto = 46 + filas * ALTO_FILA + 6;
+
+  let svg = '<svg viewBox="0 0 ' + ANCHO + ' ' + alto + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // Eje: línea con puntas de flecha en los dos lados
+  const yEje = 20;
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + yEje + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+         '" y2="' + yEje + '" stroke="#555"/>';
+  svg += '<path d="M ' + (MARGEN.izq + 7) + ' ' + (yEje - 4) + ' L ' + MARGEN.izq + ' ' + yEje +
+         ' L ' + (MARGEN.izq + 7) + ' ' + (yEje + 4) + '" fill="none" stroke="#555"/>';
+  svg += '<path d="M ' + (MARGEN.izq + ANCHO_UTIL - 7) + ' ' + (yEje - 4) + ' L ' +
+         (MARGEN.izq + ANCHO_UTIL) + ' ' + yEje + ' L ' + (MARGEN.izq + ANCHO_UTIL - 7) +
+         ' ' + (yEje + 4) + '" fill="none" stroke="#555"/>';
+
+  // Marcas y números del eje
+  const paso = pasoMarcas();
+  const primera = Math.ceil(rangoMin / paso) * paso;
+  for (let v = primera; v <= rangoMax + 1e-9; v += paso) {
+    const x = coordX(v);
+    const esCero = Math.abs(v) < 1e-9;
+    svg += '<line x1="' + x + '" y1="' + (yEje - 4) + '" x2="' + x + '" y2="' + (yEje + 4) +
+           '" stroke="#555"/>';
+    svg += '<text x="' + x + '" y="' + (yEje - 8) + '" text-anchor="middle" font-size="10" fill="' +
+           (esCero ? "#000" : "#777") + '">' + (Math.round(v * 100) / 100) + '</text>';
+    // línea de guía tenue hacia abajo
+    svg += '<line x1="' + x + '" y1="' + (yEje + 4) + '" x2="' + x + '" y2="' + (alto - 4) +
+           '" stroke="#f0f0f0"/>';
+  }
+
+  // Filas de los intervalos
+  let y = yEje + 26;
+  svg += dibujarFila(A, y, COLOR.a, "A");
+  y += ALTO_FILA;
+  svg += dibujarFila(B, y, COLOR.b, "B");
+
+  if (verUnion) {
+    listaUnion.forEach((trozo, i) => {
+      y += ALTO_FILA;
+      svg += dibujarFila(trozo, y, COLOR.union, i === 0 ? "A∪B" : "");
+    });
+  }
+
+  if (verInter) {
+    y += ALTO_FILA;
+    svg += dibujarFila(laInterseccion, y, COLOR.inter, "A∩B");
+  }
+
+  svg += '</svg>';
+  document.getElementById("recta").innerHTML = svg;
+}
+
+/* ==================================================================
+   5. ACTUALIZACIÓN GENERAL
+   Se llama cada vez que el usuario cambia cualquier cosa.
+================================================================== */
+function actualizar() {
+  const A = leerIntervalo("a");
+  const B = leerIntervalo("b");
+
+  const notaA = document.getElementById("a-notacion");
+  const notaB = document.getElementById("b-notacion");
+
+  if (A.error || B.error) {
+    const aviso = '<span class="aviso">Escribe un número o una fracción, por ejemplo −1/3 o 2.5</span>';
+    if (A.error) notaA.innerHTML = aviso;
+    if (B.error) notaB.innerHTML = aviso;
+    if (!A.error) notaA.innerHTML = 'A = <span class="valor">' + textoIntervalo(A) + '</span>';
+    if (!B.error) notaB.innerHTML = 'B = <span class="valor">' + textoIntervalo(B) + '</span>';
+    document.getElementById("resultados").innerHTML = "";
+    document.getElementById("recta").innerHTML = "";
+    return;
+  }
+
+  notaA.innerHTML = 'A = <span class="valor">' + textoIntervalo(A) + '</span><br>' + textoConjunto(A);
+  notaB.innerHTML = 'B = <span class="valor">' + textoIntervalo(B) + '</span><br>' + textoConjunto(B);
+
+  const listaUnion = union(A, B);
+  const laInterseccion = interseccion(A, B);
+
+  const verUnion = document.getElementById("ver-union").checked;
+  const verInter = document.getElementById("ver-inter").checked;
+
+  let resultados = "";
+  if (verUnion) {
+    resultados += '<span class="r-union">A ∪ B = ' + textoLista(listaUnion) + '</span>';
+    if (listaUnion.length > 1) {
+      resultados += ' <span class="aviso">(no es un solo intervalo: hay un hueco)</span>';
+    }
+  }
+  if (verUnion && verInter) resultados += "<br>";
+  if (verInter) {
+    resultados += '<span class="r-inter">A ∩ B = ' + textoIntervalo(laInterseccion) + '</span>';
+  }
+  document.getElementById("resultados").innerHTML = resultados;
+
+  calcularRango(A, B);
+  dibujar(A, B, listaUnion, laInterseccion, verUnion, verInter);
+}
+
+// Cualquier cambio en la página vuelve a calcularlo todo
+document.querySelectorAll("input").forEach(campo => {
+  campo.addEventListener("input", actualizar);
+  campo.addEventListener("change", actualizar);
+});
+
+actualizar();
+</script>
+
+
+<script>
+/* Ajusta la escala del contenido al alto de la ventana del iframe */
+(function () {
+  const envoltorio = document.getElementById("envoltorio");
+
+  function ajustar() {
+    const altoReal = envoltorio.offsetHeight;
+    if (!altoReal) return;
+    const factor = Math.min(1, (window.innerHeight - 4) / altoReal);
+    envoltorio.style.transform = "scale(" + factor + ")";
+  }
+
+  window.addEventListener("resize", ajustar);
+  // El contenido cambia de alto al generar ejercicios o gráficas nuevas
+  if (window.ResizeObserver) new ResizeObserver(ajustar).observe(envoltorio);
+  ajustar();
+})();
+</script>
+
+</body>
+</html>

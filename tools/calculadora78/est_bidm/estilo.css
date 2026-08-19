@@ -1,0 +1,64 @@
+@charset "utf-8";
+/* CSS Document */
+
+#div1{
+	background-color: #FF0000;
+	width: 80%;
+	border: 1px solid #AAAAAA;
+	padding-top: 0;
+	padding-right: 10px;
+	padding-bottom: 0;
+	padding-left: 10px;
+	font-weight: bold;
+	color: #FFF;
+}
+#cont1{
+	background-color: #EEEEEE;
+	width: 80%;
+	border-bottom: 1px solid #AAAAAA;
+	border-left: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
+	padding: 10px;
+	display: yes;
+}
+#div2{
+	background-color: #006600;
+	width: 80%;
+	border: 1px solid #AAAAAA;
+	padding-top: 0;
+	padding-right: 10px;
+	padding-bottom: 0;
+	padding-left: 10px;
+	font-weight: bold;
+	color: #FFF;
+}
+#cont2{
+	background-color: #EEEEEE;
+	width: 80%;
+	border-bottom: 1px solid #AAAAAA;
+	border-left: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
+	padding: 10px;
+	display: none;
+}
+#div3{
+	background-color: #006600;
+	width: 80%;
+	border: 1px solid #AAAAAA;
+	padding-top: 0;
+	padding-right: 10px;
+	padding-bottom: 0;
+	padding-left: 10px;
+	font-weight: bold;
+	color: #FFF;
+}
+#cont3{
+	background-color: #EEEEEE;
+	width: 80%;
+	border-bottom: 1px solid #AAAAAA;
+	border-left: 1px solid #AAAAAA;
+	border-right: 1px solid #AAAAAA;
+	padding: 10px;
+	display: yes;
+}
+

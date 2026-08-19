@@ -1,0 +1,252 @@
+/* CSS Document */
+
+.botonex{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+                background-image:url(simbols/ex1.png);
+            }
+            .botonex:active{
+                background-image:url(simbols/ex2.png);
+            }
+
+.boton10x{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+                background-image:url(simbols/10x1.png);
+            }
+            .boton10x:active{
+                background-image:url(simbols/10x2.png);
+            }
+.botonr2{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+                background-image:url(simbols/r21.png);
+            }
+            .botonr2:active{
+                background-image:url(simbols/r22.png);
+            }
+			
+.botonrn{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+                background-image:url(simbols/rn1.png);
+            }
+            .botonrn:active{
+                background-image:url(simbols/rn2.png);
+            }
+
+.botonpot{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+                background-image:url(simbols/pot1.png);
+            }
+            .botonpot:active{
+                background-image:url(simbols/pot2.png);
+            }
+
+.botonnegro{
+	border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: white;
+	font-size: 8pt;
+	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 28px;
+	font-weight: bold;
+	background-image: url(botonet2.png);
+}
+.botonnegro2{
+	border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #FF0000;
+	font-size: 8pt;
+	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 28px;
+	font-weight: bold;
+	background-image: url(botonet2.png);
+}
+
+.botonrojo{
+	border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: white;
+	font-size: 10px;
+	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 40px;
+	background-image: url(botonet1_r.png);
+	font-weight: bold;
+}
+.botonnaranja{
+	border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: white;
+	font-size: 14px;
+	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 28px;
+	background-image: url(botonet_r.png);
+	font-weight: bold;
+}
+.botonamarillo{
+    border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #000000;
+    font-size: 12px;
+   	width:40px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	background-image: url(botonet.png);
+	font-weight: bold;
+}
+.botonimagen{
+border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #FFFFFF;
+    font-size: 16px;
+   	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 40px;
+	background-image: url(botonet1.png);
+	font-weight: bold;
+}
+.botonazul{
+border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #000000;
+    font-size: 12px;
+   	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	background-image: url(botonet3.png);
+}
+.botonverde2{
+	border: #000 0px solid;
+	background-color: #0B6121;
+	background-repeat: no-repeat;
+	color: #FFFFFF;
+	font-size: 12px;
+	width: 42px;
+	background-position: center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	background-image: url(botonet1_v.png);
+	font-weight: bold;
+}
+.botonazul2{
+border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #FFFFFF;
+    font-size: 10px;
+   	width:42px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	background-image: url(botonet1_a.png);
+	font-weight: bold;
+}
+.botongris{
+border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #000000;
+    font-size: 12px;
+   	width:40px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 40px;
+	background-image: url(botonet.png);
+	font-weight: bold;
+}
+.botongris2{
+border: #000 0px solid;
+	background-color: #707077;
+	background-repeat:no-repeat;
+	color: #333333;
+    font-size: 12px;
+   	width:50px;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	background-image: url(simbols/botonet.png);
+}
+.botonverde{
+border: #000 0px solid; 
+background-color: #707077;
+background-repeat:no-repeat;
+color: #FFFFFF;
+height:12px;
+width:40px;
+background-position:center;
+font-family: Geneva, Arial, Helvetica, sans-serif;
+height: 20px;
+background-image: url(botonet3.png);
+font-weight: bold;
+}
+.botongriscreditos{
+	background-repeat:repeat;
+	color: #006EB4;
+	height:20px;
+	width:inherit;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	font-weight: bold;
+	font-size: 18px;
+	background-color: #efefef;
+}
+.botongrisdescartes{
+	background-repeat: no-repeat;
+	color: #006DB6;
+	height:20px;
+	width:inherit;
+	background-position:center;
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	height: 20px;
+	font-weight: bold;
+	font-size: 18px;
+	background-color: #efefef;
+	background-image: url(logos/pdorg_80x30_ftrans.png);
+}
+
+.Estilo1 {font-family: Geneva, Arial, Helvetica, sans-serif}
+.Estilo5 {
+	font-family: Geneva, Arial, Helvetica, sans-serif;
+	font-size: 24px;
+	font-weight: bold;
+	color: #FFFFFF;
+}
+.Estilo6 {
+	color: #FFFF00;
+	font-size: 11px;
+	background-color: #666666;
+	text-decoration: blink;
+	border: 2;
+	bottom: auto;
+}
+.Estilo8 {
+	color: #333333;
+	font-size: 16px;
+}
+</style>

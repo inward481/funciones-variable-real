@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dominio y rango de una función</title>
+
+<style>
+/* ------------------------------------------------------------------
+   COLORES. Están repetidos en el objeto COLOR del script, porque los
+   atributos de un SVG generado no leen var(--...) de forma fiable.
+   Si cambias uno aquí, cámbialo también allá.
+------------------------------------------------------------------ */
+:root {
+  --color-curva:   #e8710a;   /* la gráfica */
+  --color-punto:   #1a56db;   /* el punto móvil y sus guías */
+  --color-dominio: #0b7a3b;   /* dominio, sobre el eje X */
+  --color-rango:   #8e44ad;   /* rango, sobre el eje Y */
+}
+
+body {
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 13px;
+  color: #222;
+  margin: 0;
+  padding: 4px;
+  background: transparent;
+}
+
+.barra { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+
+select {
+  font-size: 13px; padding: 2px 4px;
+  border: 1px solid #bbb; border-radius: 3px; background: #fff;
+}
+
+.barra label { cursor: pointer; user-select: none; }
+.barra input { vertical-align: middle; margin-right: 3px; }
+.eti-dom { color: var(--color-dominio); font-weight: bold; }
+.eti-ran { color: var(--color-rango); font-weight: bold; }
+
+svg { width: 100%; height: auto; display: block; touch-action: none; cursor: ew-resize; }
+
+.lectura { text-align: center; font-size: 14px; margin: 3px 0 1px 0; }
+.lectura b { color: var(--color-punto); }
+
+.conjuntos { text-align: center; font-size: 13px; line-height: 1.5; }
+.conjuntos .dom { color: var(--color-dominio); font-weight: bold; }
+.conjuntos .ran { color: var(--color-rango); font-weight: bold; }
+
+.pista { text-align: center; font-size: 11px; color: #777; margin-top: 2px; }
+
+/* ---- Ajuste automático al alto disponible ----
+   El contenido se encoge (nunca se agranda) hasta caber en el iframe,
+   así el applet nunca muestra barra de desplazamiento. Se usa transform,
+   que no altera el tamaño de la maquetación: por eso offsetHeight sigue
+   dando el alto real y no se produce un bucle de medición. */
+html, body { overflow: hidden; margin: 0; }
+#envoltorio { transform-origin: top center; }
+</style>
+</head>
+
+<body>
+<div id="envoltorio">
+
+
+<div class="barra">
+  <select id="selector"></select>
+  <label class="eti-dom"><input type="checkbox" id="ver-dominio" checked>Ver dominio</label>
+  <label class="eti-ran"><input type="checkbox" id="ver-rango" checked>Ver rango</label>
+</div>
+
+<!-- El script dibuja aquí la gráfica -->
+<div id="grafica"></div>
+
+<p class="lectura">
+  x = <b id="lectura-x">0</b> &nbsp;→&nbsp; f(x) = <b id="lectura-y">0</b>
+</p>
+
+<p class="conjuntos">
+  <span class="dom">Dom f = <span id="texto-dom"></span></span> &nbsp;&nbsp;
+  <span class="ran">Ran f = <span id="texto-ran"></span></span>
+</p>
+
+<p class="pista">Arrastra el punto azul a lo largo de la curva.</p>
+
+</div>
+<script>
+/* ==================================================================
+   1. LAS FUNCIONES
+   Cada una trae su regla, su dominio, su rango y la ventana de la
+   gráfica. Los rangos se comprobaron muestreando el dominio.
+   Todas las ventanas miden 7 unidades de ancho por 4.6 de alto, para
+   que la escala sea la misma al cambiar de función.
+================================================================== */
+const FUNCIONES = [
+  {
+    nombre: "g(x) = x³/2 − x   en [−2, 2]",
+    f: x => 0.5 * x * x * x - x,
+    dom: { min: -2, max: 2, minCerrado: true, maxCerrado: true, texto: "[−2, 2]" },
+    ran: { min: -2, max: 2, minCerrado: true, maxCerrado: true, texto: "[−2, 2]" },
+    vista: { xMin: -3.5, xMax: 3.5, yMin: -2.3, yMax: 2.3 }
+  },
+  {
+    nombre: "f(x) = x²   en [−2, 2]",
+    f: x => x * x,
+    dom: { min: -2, max: 2, minCerrado: true, maxCerrado: true, texto: "[−2, 2]" },
+    ran: { min: 0, max: 4, minCerrado: true, maxCerrado: true, texto: "[0, 4]" },
+    vista: { xMin: -3.5, xMax: 3.5, yMin: -0.6, yMax: 4.0 }
+  },
+  {
+    nombre: "f(x) = √(x+2)   en [−2, 4]",
+    f: x => Math.sqrt(x + 2),
+    dom: { min: -2, max: 4, minCerrado: true, maxCerrado: true, texto: "[−2, 4]" },
+    ran: { min: 0, max: Math.sqrt(6), minCerrado: true, maxCerrado: true, texto: "[0, √6]" },
+    vista: { xMin: -3, xMax: 4, yMin: -1.2, yMax: 3.4 }
+  },
+  {
+    nombre: "f(x) = 1/x   en [1/2, 4]",
+    f: x => 1 / x,
+    dom: { min: 0.5, max: 4, minCerrado: true, maxCerrado: true, texto: "[1/2, 4]" },
+    ran: { min: 0.25, max: 2, minCerrado: true, maxCerrado: true, texto: "[1/4, 2]" },
+    vista: { xMin: -1, xMax: 6, yMin: -1.2, yMax: 3.4 }
+  },
+  {
+    nombre: "f(x) = x   en (−2, 2)",
+    f: x => x,
+    dom: { min: -2, max: 2, minCerrado: false, maxCerrado: false, texto: "(−2, 2)" },
+    ran: { min: -2, max: 2, minCerrado: false, maxCerrado: false, texto: "(−2, 2)" },
+    vista: { xMin: -3.5, xMax: 3.5, yMin: -2.3, yMax: 2.3 }
+  },
+  {
+    nombre: "f(x) = |x| − 1   en [−3, 3]",
+    f: x => Math.abs(x) - 1,
+    dom: { min: -3, max: 3, minCerrado: true, maxCerrado: true, texto: "[−3, 3]" },
+    ran: { min: -1, max: 2, minCerrado: true, maxCerrado: true, texto: "[−1, 2]" },
+    vista: { xMin: -3.5, xMax: 3.5, yMin: -1.8, yMax: 2.8 }
+  }
+];
+
+/* Los mismos colores del CSS, para los atributos del SVG */
+const COLOR = {
+  curva:   "#e8710a",
+  punto:   "#1a56db",
+  dominio: "#0b7a3b",
+  rango:   "#8e44ad",
+  eje:     "#555",
+  rejilla: "#e9e9ef"
+};
+
+/* ==================================================================
+   2. MEDIDAS DEL DIBUJO
+================================================================== */
+const ANCHO = 560, ALTO = 300;
+const MARGEN = { izq: 22, der: 18, arr: 12, aba: 12 };
+const ANCHO_UTIL = ANCHO - MARGEN.izq - MARGEN.der;
+const ALTO_UTIL  = ALTO - MARGEN.arr - MARGEN.aba;
+
+let actual = FUNCIONES[0];   // función elegida
+let xPunto = -1;             // posición del punto móvil
+
+function coordX(x) {
+  const v = actual.vista;
+  return MARGEN.izq + ((x - v.xMin) / (v.xMax - v.xMin)) * ANCHO_UTIL;
+}
+function coordY(y) {
+  const v = actual.vista;
+  return MARGEN.arr + ALTO_UTIL - ((y - v.yMin) / (v.yMax - v.yMin)) * ALTO_UTIL;
+}
+
+/* Redondea para mostrar, sin decimales inútiles */
+function bonito(numero) {
+  const redondeado = Math.round(numero * 100) / 100;
+  return String(redondeado);
+}
+
+/* ==================================================================
+   3. DIBUJO
+================================================================== */
+
+/* Marca de extremo: círculo lleno si el extremo pertenece al conjunto,
+   hueco si no. Es la convención de siempre para abierto y cerrado. */
+function marcaExtremo(x, y, cerrado, color) {
+  return '<circle cx="' + x + '" cy="' + y + '" r="4" stroke="' + color +
+         '" stroke-width="2" fill="' + (cerrado ? color : "#fff") + '"/>';
+}
+
+function dibujar() {
+  const v = actual.vista;
+  const dom = actual.dom, ran = actual.ran;
+  const yPunto = actual.f(xPunto);
+
+  let svg = '<svg viewBox="0 0 ' + ANCHO + ' ' + ALTO + '" xmlns="http://www.w3.org/2000/svg">';
+
+  // --- Rejilla, una línea por unidad ---
+  for (let x = Math.ceil(v.xMin); x <= v.xMax; x++) {
+    svg += '<line x1="' + coordX(x) + '" y1="' + MARGEN.arr + '" x2="' + coordX(x) +
+           '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+  for (let y = Math.ceil(v.yMin); y <= v.yMax; y++) {
+    svg += '<line x1="' + MARGEN.izq + '" y1="' + coordY(y) + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+           '" y2="' + coordY(y) + '" stroke="' + COLOR.rejilla + '"/>';
+  }
+
+  // --- Ejes con sus números ---
+  const yCero = coordY(0), xCero = coordX(0);
+  svg += '<line x1="' + MARGEN.izq + '" y1="' + yCero + '" x2="' + (MARGEN.izq + ANCHO_UTIL) +
+         '" y2="' + yCero + '" stroke="' + COLOR.eje + '"/>';
+  svg += '<line x1="' + xCero + '" y1="' + MARGEN.arr + '" x2="' + xCero +
+         '" y2="' + (MARGEN.arr + ALTO_UTIL) + '" stroke="' + COLOR.eje + '"/>';
+  svg += '<text x="' + (MARGEN.izq + ANCHO_UTIL - 4) + '" y="' + (yCero - 5) +
+         '" font-size="12" font-style="italic" fill="' + COLOR.eje + '">x</text>';
+  svg += '<text x="' + (xCero + 6) + '" y="' + (MARGEN.arr + 10) +
+         '" font-size="12" font-style="italic" fill="' + COLOR.eje + '">y</text>';
+
+  for (let x = Math.ceil(v.xMin); x <= v.xMax; x++) {
+    if (x === 0) continue;
+    svg += '<text x="' + coordX(x) + '" y="' + (yCero + 12) + '" text-anchor="middle"' +
+           ' font-size="10" fill="#888">' + x + '</text>';
+  }
+  for (let y = Math.ceil(v.yMin); y <= v.yMax; y++) {
+    if (y === 0) continue;
+    svg += '<text x="' + (xCero - 5) + '" y="' + (coordY(y) + 3) + '" text-anchor="end"' +
+           ' font-size="10" fill="#888">' + y + '</text>';
+  }
+
+  // --- Dominio sobre el eje X ---
+  if (document.getElementById("ver-dominio").checked) {
+    svg += '<line x1="' + coordX(dom.min) + '" y1="' + yCero + '" x2="' + coordX(dom.max) +
+           '" y2="' + yCero + '" stroke="' + COLOR.dominio + '" stroke-width="5"/>';
+    svg += marcaExtremo(coordX(dom.min), yCero, dom.minCerrado, COLOR.dominio);
+    svg += marcaExtremo(coordX(dom.max), yCero, dom.maxCerrado, COLOR.dominio);
+    svg += '<text x="' + coordX((dom.min + dom.max) / 2) + '" y="' + (yCero + 24) +
+           '" text-anchor="middle" font-size="12" font-weight="bold" fill="' +
+           COLOR.dominio + '">Dom f</text>';
+  }
+
+  // --- Rango sobre el eje Y ---
+  if (document.getElementById("ver-rango").checked) {
+    svg += '<line x1="' + xCero + '" y1="' + coordY(ran.min) + '" x2="' + xCero +
+           '" y2="' + coordY(ran.max) + '" stroke="' + COLOR.rango + '" stroke-width="5"/>';
+    svg += marcaExtremo(xCero, coordY(ran.min), ran.minCerrado, COLOR.rango);
+    svg += marcaExtremo(xCero, coordY(ran.max), ran.maxCerrado, COLOR.rango);
+    svg += '<text x="' + (xCero - 8) + '" y="' + (coordY((ran.min + ran.max) / 2) - 4) +
+           '" text-anchor="end" font-size="12" font-weight="bold" fill="' +
+           COLOR.rango + '">Ran f</text>';
+  }
+
+  // --- La curva: 400 puntos a lo largo del dominio ---
+  const PASOS = 400;
+  let puntos = "";
+  for (let i = 0; i <= PASOS; i++) {
+    const x = dom.min + (dom.max - dom.min) * i / PASOS;
+    puntos += coordX(x) + "," + coordY(actual.f(x)) + " ";
+  }
+  svg += '<polyline points="' + puntos + '" fill="none" stroke="' + COLOR.curva +
+         '" stroke-width="2.5" stroke-linejoin="round"/>';
+
+  // Extremos de la curva, abiertos o cerrados según el dominio
+  svg += marcaExtremo(coordX(dom.min), coordY(actual.f(dom.min)), dom.minCerrado, COLOR.curva);
+  svg += marcaExtremo(coordX(dom.max), coordY(actual.f(dom.max)), dom.maxCerrado, COLOR.curva);
+
+  // --- Guías punteadas del punto móvil hacia los dos ejes ---
+  svg += '<line x1="' + coordX(xPunto) + '" y1="' + coordY(yPunto) + '" x2="' + coordX(xPunto) +
+         '" y2="' + yCero + '" stroke="' + COLOR.punto + '" stroke-dasharray="4 3"/>';
+  svg += '<line x1="' + coordX(xPunto) + '" y1="' + coordY(yPunto) + '" x2="' + xCero +
+         '" y2="' + coordY(yPunto) + '" stroke="' + COLOR.punto + '" stroke-dasharray="4 3"/>';
+
+  // Sombras del punto sobre cada eje: la entrada y la salida
+  svg += '<circle cx="' + coordX(xPunto) + '" cy="' + yCero + '" r="3.5" fill="' + COLOR.punto + '"/>';
+  svg += '<circle cx="' + xCero + '" cy="' + coordY(yPunto) + '" r="3.5" fill="' + COLOR.punto + '"/>';
+
+  // El punto móvil, encima de todo
+  svg += '<circle cx="' + coordX(xPunto) + '" cy="' + coordY(yPunto) +
+         '" r="6" fill="' + COLOR.punto + '" stroke="#fff" stroke-width="1.5"/>';
+
+  svg += '</svg>';
+  document.getElementById("grafica").innerHTML = svg;
+
+  document.getElementById("lectura-x").textContent = bonito(xPunto);
+  document.getElementById("lectura-y").textContent = bonito(yPunto);
+  document.getElementById("texto-dom").textContent = dom.texto;
+  document.getElementById("texto-ran").textContent = ran.texto;
+}
+
+/* ==================================================================
+   4. INTERACCIÓN
+================================================================== */
+
+/* Convierte la posición del puntero en un valor de x, sin salirse del
+   dominio. En los extremos abiertos se deja un margen minúsculo para
+   que el punto nunca caiga justo sobre un valor que no pertenece. */
+function xDesdePuntero(evento, svg) {
+  const v = actual.vista;
+  const caja = svg.getBoundingClientRect();
+  const enSVG = (evento.clientX - caja.left) * (ANCHO / caja.width);
+  let x = v.xMin + ((enSVG - MARGEN.izq) / ANCHO_UTIL) * (v.xMax - v.xMin);
+
+  const hueco = (actual.dom.max - actual.dom.min) / 1000;
+  const tope = actual.dom.min + (actual.dom.minCerrado ? 0 : hueco);
+  const techo = actual.dom.max - (actual.dom.maxCerrado ? 0 : hueco);
+  return Math.min(techo, Math.max(tope, x));
+}
+
+const zona = document.getElementById("grafica");
+let arrastrando = false;
+
+zona.addEventListener("pointerdown", function (evento) {
+  arrastrando = true;
+  xPunto = xDesdePuntero(evento, zona.querySelector("svg"));
+  dibujar();
+});
+
+zona.addEventListener("pointermove", function (evento) {
+  if (!arrastrando) return;
+  xPunto = xDesdePuntero(evento, zona.querySelector("svg"));
+  dibujar();
+});
+
+window.addEventListener("pointerup", function () { arrastrando = false; });
+window.addEventListener("pointercancel", function () { arrastrando = false; });
+
+/* Cambio de función: el punto vuelve al centro del nuevo dominio */
+const selector = document.getElementById("selector");
+FUNCIONES.forEach(function (funcion, i) {
+  selector.insertAdjacentHTML("beforeend", '<option value="' + i + '">' + funcion.nombre + '</option>');
+});
+
+selector.addEventListener("change", function () {
+  actual = FUNCIONES[selector.value];
+  xPunto = (actual.dom.min + actual.dom.max) / 2;
+  dibujar();
+});
+
+document.getElementById("ver-dominio").addEventListener("change", dibujar);
+document.getElementById("ver-rango").addEventListener("change", dibujar);
+
+/* ==================================================================
+   5. ARRANQUE
+================================================================== */
+xPunto = (actual.dom.min + actual.dom.max) / 2;
+dibujar();
+</script>
+
+
+<script>
+/* Ajusta la escala del contenido al alto de la ventana del iframe */
+(function () {
+  const envoltorio = document.getElementById("envoltorio");
+
+  function ajustar() {
+    const altoReal = envoltorio.offsetHeight;
+    if (!altoReal) return;
+    const factor = Math.min(1, (window.innerHeight - 4) / altoReal);
+    envoltorio.style.transform = "scale(" + factor + ")";
+  }
+
+  window.addEventListener("resize", ajustar);
+  // El contenido cambia de alto al generar ejercicios o gráficas nuevas
+  if (window.ResizeObserver) new ResizeObserver(ajustar).observe(envoltorio);
+  ajustar();
+})();
+</script>
+
+</body>
+</html>

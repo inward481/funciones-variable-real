@@ -1,0 +1,146 @@
+@charset "utf-8";
+body {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	text-align: center;
+}
+
+td {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+th {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+form {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	text-align: left;
+	}
+
+input {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+textarea {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+select {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+ul {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	list-style-type: disc;
+	list-style-position: outside;
+}
+
+li {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+ol {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	list-style-type: upper-roman;
+	list-style-position: outside;
+}
+
+.small {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	text-align: center;
+}
+
+.big {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	
+}
+
+.menuda {
+	font-size: 9px;
+	font-size-adjust: 0.5;
+	background-color: #333;
+	color: #FFF;
+}
+
+.lineal {
+	background-image: url(images/lineal.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+.parabola {
+	background-image: url(images/parabola.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+.cubica {
+	background-image: url(images/cubica.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+.exponencial {
+	background-image: url(images/exponencial.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+.potencial {
+	background-image: url(images/potencial.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+.logaritmica {
+	background-image: url(images/logaritmica.png);
+	background-repeat: no-repeat;
+	height: 22px;
+	width: 240px;
+	color: #FFF;
+}
+
+.bodystyle {
+	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+}
+
+.box1 {
+	padding: 3px;
+	border-width: thin;
+	border-style: solid;
+	border-color: #CCCCCC #666666 #666666 #CCCCCC;
+}
+
+.box2 {
+	border-width: 3px;
+	border-style: solid;
+	padding: 5px;
+}
+
+#chartContainer
+{
+width:290px;
+height:300px;
+background-color:white;
+position: relative;
+display: yes;
+
+}
