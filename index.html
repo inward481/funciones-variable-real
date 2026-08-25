@@ -181,6 +181,68 @@
       border: 2px solid var(--naranja); border-radius: 12px;
       padding: 22px 26px; background: rgba(255,255,255,0.55);
     }
+
+    /* ===================================================================
+
+    =================================================================== */
+
+    /* Paleta clara: mismos roles que :root, pero aclarados para el fondo oscuro */
+    body.dark {
+      --azul:    #c3e2ff;
+      --verde:   #b6f5cd;
+      --rojo:    #ffc9c0;
+      --naranja: #ffdcae;
+      --morado:  #f0d9ff;
+      --ambar:   #ffeaa8;
+    }
+
+    /* ---- Títulos ----
+       extra/style.css pinta .page h2 de azul marino y .page h3/.page h4 de
+       negro; como ese selector es más específico que las variables de la
+       plantilla, en oscuro los títulos se perdían contra el fondo. */
+    body.dark .page h2 { color: #ffeaa8; }
+    body.dark .page h3 { color: #b6f5cd; }
+    body.dark .page h4 { color: #e8eef4; }
+
+    /* ---- Texto destacado y créditos ---- */
+    body.dark .termino { color: #f0d9ff; }
+    body.dark .propio  { color: #b6f5cd; }
+    body.dark .credito { opacity: 0.9; }
+    body.dark .adorno  { color: #ffdcae; opacity: 0.85; }
+
+    /* ---- Cajas de color ----
+       El borde ya toma el color claro por las variables de arriba; aquí solo
+       se sube un poco el fondo para que la caja siga distinguiéndose del
+       fondo azul sin volverse un bloque de color. */
+    body.dark .definicion { background: rgba(195,226,255,0.12); }
+    body.dark .ejemplo    { background: rgba(182,245,205,0.12); }
+    body.dark .cuidado    { background: rgba(255,201,192,0.12); }
+    body.dark .nota       { background: rgba(255,220,174,0.12); }
+
+    /* ---- Etiquetas de las cajas ----
+       En claro son texto blanco sobre color fuerte; en oscuro se invierten:
+       color claro de fondo y texto oscuro, que es lo que más contrasta. */
+    body.dark .etiqueta { color: #14293d; }
+
+    /* ---- Tablas ----
+       La cabecera pasaría a azul clarito con texto blanco encima, así que
+       se le pone texto oscuro; y las filas alternas se aclaran un poco. */
+    body.dark table.tabla th { background: #c3e2ff; color: #14293d; }
+    body.dark table.tabla tr:nth-child(even) td { background: rgba(255,255,255,0.07); }
+    body.dark table.tabla td { border-bottom: 1px solid rgba(255,255,255,0.25); }
+
+    /* ---- Tabla de contenido ----
+       La primera regla es la que indicó la editorial: quita el recuadro de
+       fondo que traen los <span> de cada enlace y que en oscuro se veía como
+       una banda clara detrás del texto. */
+    body.dark .caja_menu .toc_link span { background-color: transparent; }
+    body.dark .caja_menu .toc_link { border-left-color: #f0d9ff; }
+
+    /* ---- Última página ----
+       El marco tenía fondo blanco al 55%; en oscuro el texto es claro y
+       quedaba texto claro sobre fondo claro. Se invierte a fondo oscuro. */
+    body.dark .marco-final { background: rgba(10,25,40,0.55); border-color: #ffdcae; }
+    body.dark .fondo-final { opacity: 0.12; }
   </style>
 </head>
 
@@ -230,7 +292,7 @@
     </div>
 
     <!-- CONTRAPORTADA -->
-    <div class="page" num="">
+<div class="page" num="">
       <p>Título de la obra:<br>
         <b>Introducción a las funciones de variable real</b></p>
 
@@ -261,13 +323,35 @@
         · <a href="https://www.geogebra.org/m/TbYpSmjd" target="_blank">Llenado de recipientes: gráfica</a>, de Juan David Serrano Díaz, en GeoGebra<br>
         · Escenas de jeroglíficos, de RED Descartes (DescartesJS), adaptadas
       </p>
+      
+      <!-- Proyecto iCartesilibri (en negrita) -->
+      <p style="margin:1.2em 0 0.2em 0;">
+        <strong>Proyecto iCartesilibri</strong>
+      </p>
 
-      <p style="margin-top:0.6em;">LICENCIA</p>
-      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">
-        <img src="images/general/by-nc-sa.svg" style="height:1.75em; margin-right:0.75em;" alt="CC BY-NC-SA 4.0"></a>
-      <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">Creative Commons Atribución-NoComercial-CompartirIgual 4.0</a>
+      <!-- Enlace -->
+      <p style="margin:0 0 0.8em 0;">
+        <a href="https://proyectodescartes.org/iCartesilibri/index.htm" target="_blank">
+          https://proyectodescartes.org/iCartesilibri/index.htm
+        </a>
+      </p>
+
+      <!-- Licencia (logo primero) + ISBN (todo en una línea) -->
+      <div style="display:flex; align-items:center; flex-wrap:wrap; gap:0.5em 1em;">
+        <span style="display:flex; align-items:center; gap:0.3em;">
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank">
+            <img src="images/general/by-nc-sa.svg" style="height:1.5em;" alt="CC BY-NC-SA 4.0">
+          </a>
+          <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es" target="_blank" style="font-size:0.85em;">
+            CC BY-NC-SA 4.0
+          </a>
+        </span>
+        <span><strong>ISBN:</strong> 978-84-10368-11-8</span>
+      </div>
     </div>
-
+    
+    
+    
     <!-- PORTADA INTERIOR -->
     <div class="page" style="text-align:center; font-size:120%;" init-page-num="true" num="">
       <br><br>
@@ -404,6 +488,7 @@
            escalado al ancho del texto y le agrega el botón de ampliar.
            width/height fijan la proporción y el tamaño de la ventana grande. -->
       <div class="interactive" width="700" height="580"
+           poster="InteSebas/Intervalos/intervalo.png"
            src="InteSebas/Intervalos/index.html"></div>
       <p class="propio">Interactivo propio</p>
     </div>
@@ -463,6 +548,7 @@
       <p>El siguiente recurso ilustra la idea de asignación: cada signo de un conjunto se corresponde con un elemento del otro. La Piedra de Rosetta es un buen ejemplo histórico, porque estableció justamente esa correspondencia entre tres sistemas de escritura.</p>
 
       <div class="interactive" width="700" height="720"
+           poster="InteSebas/jeroglificos-JS/jerogglifico.png"
            src="InteSebas/jeroglificos-JS/index.html"></div>
       <p class="credito">Recurso interactivo de RED Descartes (DescartesJS), adaptado.</p>
     </div>
@@ -529,6 +615,7 @@
     <!-- FUNCIONES 7: interactivo propio de dominio e imagen -->
     <div class="page">
       <div class="interactive" width="700" height="540"
+           poster="InteSebas/DominioRang/DominioRango.png"
            src="InteSebas/DominioRang/index.html"></div>
       <p class="propio">Interactivo propio</p>
     </div>
@@ -540,6 +627,7 @@
       <p>El perfil de una etapa ciclista es un buen ejemplo: a cada kilómetro recorrido le corresponde una única altitud.</p>
 
       <div class="interactive" width="900" height="550"
+           poster="InteSebas/funcion-montana-cicla/montana-cicla.png"
            src="InteSebas/funcion-montana-cicla/index.html"></div>
       <p class="propio">Interactivo propio, con datos de la 9.ª etapa de la Vuelta 2007</p>
     </div>
@@ -580,6 +668,7 @@
       <p>Arrastra el punto a lo largo de la curva y observa cómo el dominio se marca sobre el eje horizontal y el rango sobre el vertical. Cambia de función con el selector: la última tiene los extremos abiertos.</p>
 
       <div class="interactive" width="700" height="510"
+           poster="InteSebas/DominioRangoGrafica/DominoRangoGrafico.png"
            src="InteSebas/DominioRangoGrafica/index.html"></div>
       <p class="propio">Interactivo propio</p>
     </div>
@@ -607,6 +696,7 @@
       <p>Identifica los intervalos donde la función crece, decrece o es constante, y los extremos relativos. Al ver la solución la curva se colorea por tramos.</p>
 
       <div class="interactive" width="700" height="560"
+           poster="InteSebas/Monotonia/Monotonia.png"
            src="InteSebas/Monotonia/index.html"></div>
       <p class="propio">Interactivo propio</p>
     </div>
@@ -657,6 +747,7 @@
       <p>Ahora al revés: dada la gráfica, escribe su dominio y su rango. Fíjate en si los extremos de cada trozo están marcados con punto lleno o hueco, porque eso decide si el valor pertenece o no al conjunto.</p>
 
       <div class="interactive" width="700" height="520"
+           poster="InteSebas/DominioRangoEjercicio/DominioRangoEjercio.png"
            src="InteSebas/DominioRangoEjercicio/index.html"></div>
       <p class="propio">Interactivo propio</p>
     </div>
@@ -667,6 +758,7 @@
       <p>Las siguientes gráficas describen el proceso de llenado de distintos recipientes: la altura del líquido en función del volumen vertido.</p>
 
       <div class="interactive" width="900" height="600"
+           poster="InteSebas/Geogebra.png"
            src="https://www.geogebra.org/material/iframe/id/TbYpSmjd"></div>
       <p class="credito"><a href="https://www.geogebra.org/m/TbYpSmjd" target="_blank">Llenado de recipientes: gráfica</a>, de Juan David Serrano Díaz, en GeoGebra.</p>
     </div>
